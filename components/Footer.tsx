@@ -1,11 +1,8 @@
 import React from 'react';
 import { Mail, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-interface FooterProps {
-  onNavigate?: (page: string) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ onNavigate = (_: string) => {} }) => {
+const Footer: React.FC = () => {
   return (
     <footer className="w-full pt-20 pb-10 bg-black text-white border-t border-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,9 +11,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate = (_: string) => {} }) => {
           {/* Left Column: Brand & Contact */}
           <div className="lg:col-span-5 space-y-8">
             {/* Logo */}
-            <div 
+            <Link 
+              to="/"
               className="flex items-center gap-3 cursor-pointer"
-              onClick={() => onNavigate('home')}
             >
               <img 
                 src="https://i.ibb.co.com/XfGCQ0V3/Untitled-512-x-512-px-1.png" 
@@ -26,7 +23,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate = (_: string) => {} }) => {
               <span className="text-2xl font-bold tracking-tight text-white">
                 Perfectplus Ai
               </span>
-            </div>
+            </Link>
 
             <p className="text-gray-400 leading-relaxed text-sm md:text-base max-w-sm font-medium">
               Transform your business with AI receptionists that work 24/7, 
@@ -74,26 +71,26 @@ const Footer: React.FC<FooterProps> = ({ onNavigate = (_: string) => {} }) => {
                 {['About Us', 'Case Studies', 'Privacy Policy', 'Terms of Service'].map((item) => (
                   <li key={item}>
                     {item === 'About Us' ? (
-                      <button 
-                        onClick={() => onNavigate('about')}
-                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block bg-transparent border-none cursor-pointer p-0 text-left"
+                      <Link 
+                        to="/about"
+                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block"
                       >
                         {item}
-                      </button>
+                      </Link>
                     ) : item === 'Terms of Service' ? (
-                      <button 
-                        onClick={() => onNavigate('terms')}
-                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block bg-transparent border-none cursor-pointer p-0 text-left"
+                      <Link 
+                        to="/terms"
+                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block"
                       >
                         {item}
-                      </button>
+                      </Link>
                     ) : item === 'Privacy Policy' ? (
-                      <button 
-                        onClick={() => onNavigate('privacy')}
-                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block bg-transparent border-none cursor-pointer p-0 text-left"
+                      <Link 
+                        to="/privacy"
+                        className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block"
                       >
                         {item}
-                      </button>
+                      </Link>
                     ) : (
                       <a href="#" className="text-gray-400 hover:text-brand-purple hover:translate-x-1 transition-all duration-200 text-sm font-medium block">
                         {item}

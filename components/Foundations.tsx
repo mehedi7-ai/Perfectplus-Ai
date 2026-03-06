@@ -1,11 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 
-interface FoundationsProps {
-  onNavigate?: (page: string) => void;
-}
-
-const Foundations: React.FC<FoundationsProps> = ({ onNavigate }) => {
+const Foundations: React.FC = () => {
   return (
     <div className="py-24 relative overflow-hidden bg-white">
       {/* Background Gradient Mesh matching the reference image */}
@@ -84,12 +81,12 @@ const Foundations: React.FC<FoundationsProps> = ({ onNavigate }) => {
             >
               Book Your Free Consultation
             </button>
-            <button 
-              onClick={() => onNavigate && onNavigate('about')}
-              className="px-8 py-3.5 rounded-full bg-white text-slate-700 font-bold text-lg shadow-sm border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 w-full sm:w-auto"
+            <Link 
+              to="/about"
+              className="px-8 py-3.5 rounded-full bg-white text-slate-700 font-bold text-lg shadow-sm border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 w-full sm:w-auto flex items-center justify-center"
             >
               About Us
-            </button>
+            </Link>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500 pt-2">

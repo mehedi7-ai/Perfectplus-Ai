@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-interface NavbarProps {
-  onNavigate?: (page: string) => void;
-  activePage?: 'home' | 'about' | 'bd' | 'terms' | 'privacy';
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onNavigate = (_: string) => {}, activePage = 'home' }) => {
+const Navbar: React.FC = () => {
   const [isGlobalHovered, setIsGlobalHovered] = useState(false);
   const [isBDHovered, setIsBDHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Determine active page based on path
+  const getActivePage = () => {
+    const path = location.pathname;
+    if (path === '/') return 'home';
+    if (path === '/about') return 'about';
+    if (path === '/bd') return 'bd';
+    if (path === '/terms') return 'terms';
+    if (path === '/privacy') return 'privacy';
+    return 'home';
+  };
+
+  const activePage = getActivePage();
 
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
@@ -32,31 +43,42 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate = (_: string) => {}, activeP
     }
   }, [isMobileMenuOpen]);
 
-  const scrollToSection = (page: 'home' | 'about' | 'bd' | 'terms' | 'privacy', id: string) => {
-    if (activePage !== page) {
-      onNavigate(page);
+  // Handle hash scrolling on page load/change
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 100);
+    }
+  }, [location]);
+
+  const scrollToSection = (page: 'home' | 'about' | 'bd' | 'terms' | 'privacy', id: string) => {
+    const targetPath = page === 'home' ? '/' : `/${page}`;
+    
+    if (location.pathname !== targetPath) {
+      navigate(`${targetPath}#${id}`);
     } else {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
+    
     setIsGlobalHovered(false);
     setIsBDHovered(false);
     setIsMobileMenuOpen(false);
   };
 
   const handleMobileNavigate = (page: string) => {
-    onNavigate(page);
+    const targetPath = page === 'home' ? '/' : `/${page}`;
+    navigate(targetPath);
     setIsMobileMenuOpen(false);
   };
 
   const navItems = [
-    { id: 'home', label: 'Global' },
-    { id: 'about', label: 'About Us' },
-    { id: 'bd', label: 'BD' },
+    { id: 'home', label: 'Global', path: '/' },
+    { id: 'about', label: 'About Us', path: '/about' },
+    { id: 'bd', label: 'BD', path: '/bd' },
   ];
 
   return (
@@ -65,7 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate = (_: string) => {}, activeP
         {/* Logo Section */}
         <motion.div 
           className="flex items-center gap-3 cursor-pointer"
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('/')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -95,8 +117,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate = (_: string) => {}, activeP
                 if (item.id === 'bd') setIsBDHovered(false);
               }}
             >
-              <button 
-                onClick={() => onNavigate(item.id)}
+              <Link 
+                to={item.path}
                 className={`text-base font-semibold transition-all duration-300 hover:scale-105 bg-transparent border-none cursor-pointer flex items-center gap-1 ${
                   activePage === item.id ? 'text-brand-purple' : 'text-gray-700 hover:text-brand-purple'
                 }`}
@@ -110,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate = (_: string) => {}, activeP
                     }`} 
                   />
                 )}
-              </button>
+              </Link>
               
               {/* Active Underline */}
               {activePage === item.id && (
