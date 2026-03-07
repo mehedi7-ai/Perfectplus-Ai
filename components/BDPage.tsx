@@ -741,13 +741,33 @@ const BDPage: React.FC = () => {
             <div className="aspect-video bg-slate-900 relative overflow-hidden group border-x-4 border-b-4 border-slate-900 rounded-b-2xl shadow-2xl">
                 <iframe 
                     ref={introVideoRef}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className={`absolute inset-0 w-full h-full object-cover ${isIntroMuted ? 'pointer-events-none' : ''}`}
                     src="https://www.youtube.com/embed/JxTX_D-BD-g?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=JxTX_D-BD-g&controls=1&showinfo=0&rel=0&playsinline=1" 
                     title="Intro Video" 
                     frameBorder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     allowFullScreen
                 ></iframe>
+
+                {/* Overlay for Click-to-Unmute */}
+                {isIntroMuted && (
+                    <div 
+                        className="absolute inset-0 z-10 bg-transparent cursor-pointer"
+                        onClick={handleIntroUnmute}
+                    ></div>
+                )}
+
+                {/* Mute Indicator */}
+                {isIntroMuted && (
+                   <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                      <div className="w-20 h-14 md:w-28 md:h-20 bg-brand-purple/90 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-110 border-2 border-white/20 animate-pulse">
+                         <Volume2 className="w-10 h-10 md:w-12 md:h-12 text-white fill-white ml-1" />
+                      </div>
+                      <div className="absolute bottom-8 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md">
+                          Click to Unmute
+                      </div>
+                   </div>
+                )}
             </div>
             </div>
 
