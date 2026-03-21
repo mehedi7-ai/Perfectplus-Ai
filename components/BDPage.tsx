@@ -1406,7 +1406,7 @@ const BDPage: React.FC = () => {
                         <div className="p-3 bg-white/10 rounded-2xl group-hover:bg-brand-purple/20 transition-colors">
                            <Users className="w-6 h-6 text-white group-hover:text-brand-purple transition-colors" />
                         </div>
-                        <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/10">Basic</span>
+                        <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/10">Starter</span>
                      </div>
                      <div className="mb-6">
                         <p className="text-sm text-slate-400 line-through mb-1">Tk. 4,500/month</p>
@@ -1438,7 +1438,7 @@ const BDPage: React.FC = () => {
                            onClick={scrollToForm}
                            className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
                         >
-                           Choose Basic
+                           Choose Starter
                         </button>
                    </div>
                </motion.div>
@@ -1456,7 +1456,7 @@ const BDPage: React.FC = () => {
                      <div className="mb-6">
                         <p className="text-sm text-white/60 line-through mb-1">Tk. 8,500/month</p>
                         <div className="flex items-baseline gap-1">
-                           <span className="text-5xl font-extrabold text-white">Tk. 5,499</span>
+                           <span className="text-5xl font-extrabold text-white">Tk. 4,999</span>
                            <span className="text-slate-300 font-medium">/month</span>
                         </div>
                      </div>
@@ -1800,7 +1800,7 @@ const BDPage: React.FC = () => {
                                     </li>
                                     <li className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
                                        <span className="font-medium text-slate-700">Standard Plan</span>
-                                       <span className="font-bold text-brand-purple">BDT 5,499</span>
+                                       <span className="font-bold text-brand-purple">BDT 4,999</span>
                                     </li>
                                     <li className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
                                        <span className="font-medium text-slate-700">Premium Plan</span>
