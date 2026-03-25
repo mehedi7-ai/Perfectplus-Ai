@@ -696,13 +696,19 @@ const BDPage: React.FC = () => {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] opacity-20 pointer-events-none z-0"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
-            {/* Badge */}
-            <div className="inline-block px-4 py-1.5 mb-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full shadow-sm">
+            {/* Badge / Chat Button */}
+            <a 
+              href="https://m.me/YOUR_PAGE_USERNAME_HERE" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-1.5 mb-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full shadow-sm hover:bg-white/10 transition-colors cursor-pointer"
+            >
             <span className="text-sm font-bold text-blue-200 tracking-wide flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></span>
-                Perfectplus Platform
+                <MessageCircle className="w-4 h-4" />
+                Chat with AI
             </span>
-            </div>
+            </a>
 
             {/* Headline with Rotating Text */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight tracking-tight mb-8 max-w-7xl mx-auto">
