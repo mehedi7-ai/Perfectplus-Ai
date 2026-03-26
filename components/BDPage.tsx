@@ -698,7 +698,7 @@ const BDPage: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
             {/* Badge / Chat Button */}
             <a 
-              href="https://m.me/YOUR_PAGE_USERNAME_HERE" 
+              href="https://m.me/61586615787177" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-4 py-1.5 mb-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full shadow-sm hover:bg-white/10 transition-colors cursor-pointer"
