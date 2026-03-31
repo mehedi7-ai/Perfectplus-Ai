@@ -328,6 +328,9 @@ const BDPage: React.FC = () => {
   // Tally Form State
   const [tallyKey, setTallyKey] = useState(0);
 
+  // Pricing Calculator State
+  const [customersPerMonth, setCustomersPerMonth] = useState<number | ''>('');
+
   const handleIntroUnmute = () => {
     if (introVideoRef.current && introVideoRef.current.contentWindow) {
       introVideoRef.current.contentWindow.postMessage(
@@ -1375,206 +1378,125 @@ const BDPage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* 6. Pricing Section - Premium Upgrade */}
+      {/* 6. Pricing Section */}
       <motion.section 
         id="pricing" 
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="py-32 bg-[#0f172a] border-t border-slate-800 relative overflow-hidden"
+        className="py-32 bg-[#0B0F19] relative overflow-hidden"
       >
+         {/* Grid Background */}
+         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
+         
          {/* Background Glows */}
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-purple/20 rounded-full blur-[120px] pointer-events-none"></div>
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-20">
+         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-16">
                <h2 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6">
-                  Simple, Transparent Pricing
+                  Pricing
                </h2>
-               <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-                  Choose the plan that fits your business needs. No hidden fees.
+               <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                  Simple, transparent pricing tailored to your business needs.
                </p>
             </div>
 
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start mb-16"
-            >
-               
-               {/* Starter Plan */}
-               <motion.div variants={itemVariants} className="bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-white/10 hover:border-brand-purple/50 hover:bg-slate-800/60 transition-all duration-500 flex flex-col h-full relative group shadow-xl hover:shadow-brand-purple/20 hover:-translate-y-2">
-                  <div className="p-8 pb-4">
-                     <div className="flex justify-between items-start mb-6">
-                        <div className="p-3 bg-white/10 rounded-2xl group-hover:bg-brand-purple/20 transition-colors">
-                           <Users className="w-6 h-6 text-white group-hover:text-brand-purple transition-colors" />
-                        </div>
-                        <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/10">Starter</span>
-                     </div>
-                     <div className="mb-6">
-                        <p className="text-sm text-slate-400 line-through mb-1">Tk. 4,500/month</p>
-                        <div className="flex items-baseline gap-1">
-                           <span className="text-4xl font-extrabold text-white">Tk. 2,999</span>
-                           <span className="text-slate-400 font-medium">/month</span>
-                        </div>
-                     </div>
-                  </div>
-                  <div className="bg-white/5 py-2 text-center border-y border-white/5 group-hover:border-brand-purple/20 transition-colors">
-                     <span className="text-slate-300 font-bold text-xs uppercase tracking-wide">100 User free after integration</span>
-                  </div>
-                  <div className="p-8 pt-6 flex-grow">
-                     <ul className="space-y-4 mb-8">
-                        <li className="flex items-start gap-3">
-                           <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                           <span className="text-sm text-slate-300 font-medium">500 Unique customers/month</span>
-                        </li>
-                        {pricingFeatures.slice(0, 8).map((feature, idx) => (
-                           <li key={idx} className="flex items-start gap-3">
-                              <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-300 font-medium">{feature}</span>
-                           </li>
-                        ))}
-                     </ul>
-                  </div>
-                   <div className="p-8 pt-0 mt-auto">
-                        <button 
-                           onClick={scrollToForm}
-                           className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
-                        >
-                           Choose Starter
-                        </button>
-                   </div>
-               </motion.div>
+            <div className="bg-[#131B2C]/80 backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row gap-8 shadow-2xl shadow-black/50 border border-slate-800 relative overflow-hidden">
+              
+              {/* Decorative gradient line */}
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-purple to-blue-500"></div>
 
-               {/* Standard Plan (HIGHLIGHTED) */}
-               <motion.div variants={itemVariants} className="bg-gradient-to-b from-[#2e1065] to-slate-900 rounded-3xl shadow-2xl border border-brand-purple/50 overflow-hidden transform scale-105 z-20 flex flex-col h-full relative group hover:shadow-brand-purple/40 hover:-translate-y-2 transition-all duration-500">
-                  <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-purple to-blue-500"></div>
-                  <div className="p-8 pb-4">
-                     <div className="flex justify-between items-start mb-6">
-                        <div className="p-3 bg-brand-purple/20 rounded-2xl border border-brand-purple/30">
-                           <Zap className="w-6 h-6 text-brand-purple fill-brand-purple" />
-                        </div>
-                        <span className="px-3 py-1 bg-brand-purple text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-lg shadow-brand-purple/30">Most Popular</span>
-                     </div>
-                     <div className="mb-6">
-                        <p className="text-sm text-white/60 line-through mb-1">Tk. 8,500/month</p>
-                        <div className="flex items-baseline gap-1">
-                           <span className="text-5xl font-extrabold text-white">Tk. 4,999</span>
-                           <span className="text-slate-300 font-medium">/month</span>
-                        </div>
-                     </div>
+              {/* Left Column - Subscription */}
+              <div className="bg-slate-900/50 rounded-3xl p-8 border border-slate-800 flex-1 flex flex-col relative group hover:border-brand-purple/50 transition-colors duration-300">
+                <h3 className="text-2xl font-bold text-white text-center mb-6">Subscription</h3>
+                
+                <div className="flex justify-center mb-8">
+                  <div className="bg-brand-purple/20 rounded-full p-1 flex">
+                    <button className="bg-brand-purple text-white px-8 py-2 rounded-full text-sm font-bold shadow-md shadow-brand-purple/20">Monthly</button>
                   </div>
-                  <div className="bg-brand-purple/10 py-2 text-center border-y border-brand-purple/20">
-                     <span className="text-brand-purple font-bold text-xs uppercase tracking-wide">100 User free after integration</span>
-                  </div>
-                  <div className="p-8 pt-6 flex-grow">
-                     <ul className="space-y-4 mb-8">
-                        <li className="flex items-start gap-3">
-                           <div className="w-5 h-5 rounded-full bg-brand-purple flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-purple/50">
-                             <Check className="w-3 h-3 text-white" strokeWidth={4} />
-                           </div>
-                           <span className="text-sm text-white font-bold">1,000 Unique customers/month</span>
-                        </li>
-                        {pricingFeatures.map((feature, idx) => (
-                           <li key={idx} className="flex items-start gap-3">
-                              <Check className="w-5 h-5 text-brand-purple flex-shrink-0" />
-                              <span className="text-sm text-slate-300 font-medium">{feature}</span>
-                           </li>
-                        ))}
-                     </ul>
-                  </div>
-                   <div className="p-8 pt-0 mt-auto">
-                        <button 
-                           onClick={scrollToForm}
-                           className="w-full py-4 bg-gradient-to-r from-brand-purple to-blue-600 hover:from-brand-purple/90 hover:to-blue-600/90 text-white font-bold rounded-xl transition-all shadow-xl hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
-                        >
-                           Get Standard Plan
-                        </button>
-                   </div>
-               </motion.div>
+                </div>
 
-               {/* Premium Plan */}
-               <motion.div variants={itemVariants} className="bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-white/10 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-500 flex flex-col h-full relative group shadow-xl hover:shadow-blue-500/20 hover:-translate-y-2">
-                  <div className="p-8 pb-4">
-                     <div className="flex justify-between items-start mb-6">
-                        <div className="p-3 bg-white/10 rounded-2xl group-hover:bg-blue-500/20 transition-colors">
-                           <Users className="w-6 h-6 text-white group-hover:text-blue-400 transition-colors" />
-                        </div>
-                        <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/10">Premium</span>
-                     </div>
-                     <div className="mb-6">
-                        <p className="text-sm text-slate-400 line-through mb-1">Tk. 19,500/month</p>
-                        <div className="flex items-baseline gap-1">
-                           <span className="text-4xl font-extrabold text-white">Tk. 9,999</span>
-                           <span className="text-slate-400 font-medium">/month</span>
-                        </div>
-                     </div>
+                <div className="text-center mb-8">
+                  <div className="text-4xl font-extrabold text-brand-purple mb-2">Tk. 999 <span className="text-lg text-slate-400 font-medium">/ month</span></div>
+                  <div className="text-sm text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+                    & Tk. 2.90 per customer (AI cost)
+                    <AlertCircle className="w-4 h-4 text-brand-purple" />
                   </div>
-                  <div className="bg-white/5 py-2 text-center border-y border-white/5 group-hover:border-blue-500/20 transition-colors">
-                     <span className="text-slate-300 font-bold text-xs uppercase tracking-wide">100 User free after integration</span>
-                  </div>
-                  <div className="p-8 pt-6 flex-grow">
-                     <ul className="space-y-4 mb-8">
-                        <li className="flex items-start gap-3">
-                           <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                           <span className="text-sm text-slate-300 font-medium">2,000 Unique customers/month</span>
-                        </li>
-                        {pricingFeatures.map((feature, idx) => (
-                           <li key={idx} className="flex items-start gap-3">
-                              <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-300 font-medium">{feature}</span>
-                           </li>
-                        ))}
-                     </ul>
-                  </div>
-                  <div className="p-8 pt-0 mt-auto">
-                        <button 
-                           onClick={scrollToForm}
-                           className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
-                        >
-                           Choose Premium
-                        </button>
-                   </div>
-               </motion.div>
-            </motion.div>
+                </div>
 
-            {/* Pay As You Go Section */}
-            <div className="bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-brand-purple/30 shadow-lg hover:shadow-brand-purple/20 transition-all duration-300">
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
-                  <div className="lg:col-span-1">
-                      <div className="flex items-center gap-3 mb-6">
-                         <div className="p-3 bg-brand-purple/20 rounded-2xl">
-                            <Zap className="w-6 h-6 text-brand-purple" />
-                         </div>
-                         <span className="px-3 py-1 bg-brand-purple text-white text-xs font-bold rounded-full uppercase tracking-wider">Pay as you go</span>
+                <div className="mb-8 bg-slate-800/50 p-5 rounded-2xl shadow-sm border border-slate-700">
+                  <h4 className="text-center text-slate-300 font-semibold mb-4 text-sm">Calculate Your Monthly Cost</h4>
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      placeholder="Enter customers per month"
+                      value={customersPerMonth}
+                      onChange={(e) => setCustomersPerMonth(e.target.value ? Number(e.target.value) : '')}
+                      className="w-full bg-slate-900/50 border-2 border-slate-700 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10 text-sm font-medium transition-all placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-sm mt-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 shadow-sm">
+                  <div className="flex justify-between border-b border-slate-700 pb-3">
+                    <span className="text-slate-400 font-medium">Customers</span>
+                    <span className="font-bold text-white">{customersPerMonth || 0}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-700 pb-3">
+                    <span className="text-slate-400 font-medium">AI Cost (pay as you go)</span>
+                    <span className="font-bold text-white">Tk. {((Number(customersPerMonth) || 0) * 2.90).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-700 pb-3">
+                    <span className="text-slate-400 font-medium">Subscription (Monthly)</span>
+                    <span className="font-bold text-white">Tk. 999.00</span>
+                  </div>
+                  <div className="flex justify-between pt-2 items-center">
+                    <span className="font-bold text-white text-base">Total Monthly Cost:</span>
+                    <span className="font-extrabold text-xl text-brand-purple">Tk. {(((Number(customersPerMonth) || 0) * 2.90) + 999).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Features */}
+              <div className="bg-slate-900/50 rounded-3xl p-8 border border-slate-800 flex-1 flex flex-col hover:border-brand-purple/50 transition-colors duration-300">
+                <h3 className="text-2xl font-bold text-white text-center mb-8">What's Included</h3>
+                
+                <ul className="space-y-5">
+                  {[
+                    "Instant reply",
+                    "24/7 Service",
+                    "Trained on your business",
+                    "Connect your website/database",
+                    "Send replies to 100+ customers simultaneously",
+                    "Can read image and voice",
+                    "Manual pause option",
+                    "Orders in google sheets",
+                    "Handle customer queries",
+                    "Take orders on website",
+                    "Courier tracking",
+                    "Transfer to human agent"
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div className="mt-0.5 bg-brand-purple/20 p-1 rounded-full flex-shrink-0">
+                        <Check className="w-4 h-4 text-brand-purple" strokeWidth={3} />
                       </div>
-                      <div className="mb-6">
-                         <div className="flex items-baseline gap-2 mb-2">
-                           <span className="text-5xl font-extrabold text-white">0.19 BDT</span>
-                        </div>
-                        <p className="text-slate-400 font-medium uppercase tracking-wide text-sm">Per AI Reply</p>
-                      </div>
-                      <button 
-                           onClick={scrollToForm}
-                           className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
-                      >
-                           Start Custom Plan
-                      </button>
-                  </div>
-                  <div className="lg:col-span-2">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                        {pricingFeatures.map((feature, idx) => (
-                           <li key={idx} className="flex items-start gap-3 list-none">
-                              <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-300 font-medium">{feature}</span>
-                           </li>
-                        ))}
-                     </div>
-                  </div>
-               </div>
+                      <span className="text-slate-300 font-medium text-sm leading-relaxed">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="mt-auto pt-8">
+                   <button 
+                     onClick={scrollToForm}
+                     className="w-full py-4 bg-gradient-to-r from-brand-purple to-blue-600 hover:from-brand-purple/90 hover:to-blue-600/90 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
+                   >
+                     Get Started Now
+                   </button>
+                </div>
+              </div>
+
             </div>
          </div>
       </motion.section>
