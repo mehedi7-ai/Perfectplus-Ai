@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { OrderFormModal } from './OrderFormModal';
 import { ContactFormModal } from './ContactFormModal';
@@ -250,6 +250,25 @@ const allCountries = [
 
 const BDPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }, 300);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location]);
+
   const words = ["Facebook", "Instagram", "WhatsApp", "Telegram"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -377,7 +396,7 @@ const BDPage: React.FC = () => {
 
   // Sticky Navigator State
   const [isSticky, setIsSticky] = useState(false);
-  const [activeTab, setActiveTab] = useState('case-study');
+  const [activeTab, setActiveTab] = useState('casestudy');
 
   const scrollToAnchor = (id: string) => {
     const element = document.getElementById(id);
@@ -409,7 +428,7 @@ const BDPage: React.FC = () => {
     handleScroll();
 
     // 2. Intersection observer for highlighting the active section
-    const sectionIds = ['case-study', 'demo', 'pricing', 'custom-solution', 'resources'];
+    const sectionIds = ['casestudy', 'demo', 'pricing', 'custom-solution', 'resources'];
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -433,23 +452,6 @@ const BDPage: React.FC = () => {
       }
     });
 
-    // 3. Initial hash scroll after 150ms on load
-    if (window.location.hash) {
-      const id = window.location.hash.replace('#', '');
-      const timer = setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) {
-          scrollToAnchor(id);
-        }
-      }, 150);
-      
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        observer.disconnect();
-        clearTimeout(timer);
-      };
-    }
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
@@ -841,9 +843,9 @@ const BDPage: React.FC = () => {
                   
                   {/* Tab 1: Case Study */}
                   <button
-                    onClick={() => scrollToAnchor('case-study')}
+                    onClick={() => scrollToAnchor('casestudy')}
                     className={`whitespace-nowrap cursor-pointer transition-all duration-300 flex-1 md:flex-initial text-center font-semibold text-xs md:text-sm px-2 md:px-6 py-2 rounded-full ${
-                      activeTab === 'case-study'
+                      activeTab === 'casestudy'
                         ? 'bg-purple-700 text-white rounded-full font-bold'
                         : 'text-slate-400 hover:text-white'
                     }`}
@@ -1059,7 +1061,7 @@ const BDPage: React.FC = () => {
 
       {/* Customer Stories Section */}
       <motion.section 
-        id="case-study" 
+        id="casestudy" 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
