@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
   // Determine active page based on path
   const getActivePage = () => {
     const path = location.pathname;
-    if (path === '/') return 'home';
+    if (path === '/' || path === '/global') return 'home';
     if (path === '/about') return 'about';
     if (path === '/bd') return 'bd';
     if (path === '/terms') return 'terms';
@@ -69,14 +69,32 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const handleMobileNavigate = (page: string) => {
-    const targetPath = page === 'home' ? '/' : `/${page}`;
-    navigate(targetPath);
+  const handleMobileNavigate = (path: string) => {
+    const isCurrentPage = 
+      (path === '/global' && (location.pathname === '/' || location.pathname === '/global')) ||
+      (location.pathname === path);
+
+    if (isCurrentPage) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate(path);
+    }
     setIsMobileMenuOpen(false);
   };
 
+  const handleNavClick = (e: React.MouseEvent, targetPath: string) => {
+    const isCurrentPage = 
+      (targetPath === '/global' && (location.pathname === '/' || location.pathname === '/global')) ||
+      (location.pathname === targetPath);
+
+    if (isCurrentPage) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const navItems = [
-    { id: 'home', label: 'Global', path: '/' },
+    { id: 'home', label: 'Global', path: '/global' },
     { id: 'about', label: 'About Us', path: '/about' },
     { id: 'bd', label: 'BD', path: '/bd' },
   ];
@@ -108,30 +126,15 @@ const Navbar: React.FC = () => {
             <div 
               key={item.id} 
               className="relative"
-              onMouseEnter={() => {
-                if (item.id === 'home') setIsGlobalHovered(true);
-                if (item.id === 'bd') setIsBDHovered(true);
-              }}
-              onMouseLeave={() => {
-                if (item.id === 'home') setIsGlobalHovered(false);
-                if (item.id === 'bd') setIsBDHovered(false);
-              }}
             >
               <Link 
                 to={item.path}
+                onClick={(e) => handleNavClick(e, item.path)}
                 className={`text-base font-semibold transition-all duration-300 hover:scale-105 bg-transparent border-none cursor-pointer flex items-center gap-1 ${
                   activePage === item.id ? 'text-brand-purple' : 'text-gray-700 hover:text-brand-purple'
                 }`}
               >
                 {item.label}
-                {(item.id === 'home' || item.id === 'bd') && (
-                  <ChevronDown 
-                    size={14} 
-                    className={`transition-transform duration-300 ${
-                      (item.id === 'home' && isGlobalHovered) || (item.id === 'bd' && isBDHovered) ? 'rotate-180' : ''
-                    }`} 
-                  />
-                )}
               </Link>
               
               {/* Active Underline */}
@@ -142,84 +145,6 @@ const Navbar: React.FC = () => {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
-
-              {/* Global Dropdown */}
-              {item.id === 'home' && (
-                <AnimatePresence>
-                  {isGlobalHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden p-2"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('home', 'solutions'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">Solutions</span>
-                          <span className="block text-slate-400 text-xs">Industry Solutions</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('home', 'demo'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">Live Demo</span>
-                          <span className="block text-slate-400 text-xs">Live Software</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('home', 'faq'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">FAQ</span>
-                          <span className="block text-slate-400 text-xs">Common Questions</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
-
-              {/* BD Dropdown */}
-              {item.id === 'bd' && (
-                <AnimatePresence>
-                  {isBDHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden p-2"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('bd', 'demo'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">Live Demo</span>
-                          <span className="block text-slate-400 text-xs">See it in action</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('bd', 'pricing'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">Pricing</span>
-                          <span className="block text-slate-400 text-xs">Plans & Costs</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); scrollToSection('bd', 'resources'); }}
-                          className="text-left px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors group"
-                        >
-                          <span className="block text-white font-bold text-sm mb-0.5 group-hover:text-brand-purple transition-colors">Resources</span>
-                          <span className="block text-slate-400 text-xs">Guides & Tools</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
             </div>
           ))}
         </div>
@@ -228,14 +153,7 @@ const Navbar: React.FC = () => {
         <div className="hidden md:flex items-center">
           <button 
             onClick={() => {
-              if (activePage === 'bd') {
-                const formElement = document.getElementById('onboarding-form');
-                if (formElement) {
-                    formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              } else {
-                window.open('https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi', '_blank');
-              }
+              window.open('https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi', '_blank');
             }}
             className="bg-brand-purple hover:bg-brand-purple/90 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
           >
@@ -268,64 +186,13 @@ const Navbar: React.FC = () => {
               {navItems.map((item) => (
                 <div key={item.id} className="flex flex-col gap-3">
                   <button
-                    onClick={() => {
-                      if (item.id === 'home') {
-                        setIsGlobalHovered(!isGlobalHovered);
-                      } else if (item.id === 'bd') {
-                        setIsBDHovered(!isBDHovered);
-                      } else {
-                        handleMobileNavigate(item.id);
-                      }
-                    }}
+                    onClick={() => handleMobileNavigate(item.path)}
                     className={`text-2xl font-bold text-left flex items-center justify-between w-full ${
                       activePage === item.id ? 'text-brand-purple' : 'text-gray-900'
                     }`}
                   >
                     {item.label}
-                    {(item.id === 'home' || item.id === 'bd') && (
-                      <ChevronDown 
-                        size={20} 
-                        className={`transition-transform duration-300 ${
-                          (item.id === 'home' && isGlobalHovered) || (item.id === 'bd' && isBDHovered) ? 'rotate-180' : ''
-                        }`} 
-                      />
-                    )}
                   </button>
-                  
-                  {/* Mobile Sub-menus */}
-                  <AnimatePresence>
-                    {item.id === 'home' && isGlobalHovered && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pl-4 flex flex-col gap-4 border-l-2 border-gray-100 py-2">
-                          <button onClick={() => scrollToSection('home', 'solutions')} className="text-left text-gray-600 font-medium text-lg">Solutions</button>
-                          <button onClick={() => scrollToSection('home', 'demo')} className="text-left text-gray-600 font-medium text-lg">Live Demo</button>
-                          <button onClick={() => scrollToSection('home', 'faq')} className="text-left text-gray-600 font-medium text-lg">FAQ</button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  
-                  <AnimatePresence>
-                    {item.id === 'bd' && isBDHovered && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pl-4 flex flex-col gap-4 border-l-2 border-gray-100 py-2">
-                          <button onClick={() => scrollToSection('bd', 'demo')} className="text-left text-gray-600 font-medium text-lg">Live Demo</button>
-                          <button onClick={() => scrollToSection('bd', 'pricing')} className="text-left text-gray-600 font-medium text-lg">Pricing</button>
-                          <button onClick={() => scrollToSection('bd', 'resources')} className="text-left text-gray-600 font-medium text-lg">Resources</button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
               ))}
             </div>
@@ -334,14 +201,7 @@ const Navbar: React.FC = () => {
               <button 
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  if (activePage === 'bd') {
-                    const formElement = document.getElementById('onboarding-form');
-                    if (formElement) {
-                        formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  } else {
-                    window.open('https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi', '_blank');
-                  }
+                  window.open('https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi', '_blank');
                 }}
                 className="w-full bg-brand-purple hover:bg-brand-purple/90 text-white px-6 py-4 rounded-xl text-lg font-bold transition-all duration-300 shadow-lg"
               >

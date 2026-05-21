@@ -5,9 +5,11 @@ import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import AboutUsPage from './components/AboutUsPage';
 import BDPage from './components/BDPage';
+import ResourcesPage from './components/ResourcesPage';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import ScrollToTop from './components/ScrollToTop';
+import { FloatingContact } from './components/FloatingContact';
 
 const App: React.FC = () => {
   return (
@@ -17,8 +19,10 @@ const App: React.FC = () => {
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/global" element={<HomePage />} />
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/bd" element={<BDPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
@@ -26,6 +30,7 @@ const App: React.FC = () => {
 
       <Footer />
       <ScrollToTop />
+      <FloatingContact />
     </div>
   );
 };

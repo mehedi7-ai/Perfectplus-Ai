@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { OrderFormModal } from './OrderFormModal';
+import { ContactFormModal } from './ContactFormModal';
 import { Play, Phone, ArrowRight, ClipboardList, Cpu, Rocket, CheckCircle2, XCircle, Check, Users, Zap, ChevronDown, ChevronUp, AlertCircle, Search, X, TrendingUp, Clock, ShieldCheck, MessageCircle, Mail, BarChart3, Globe, Lock, Volume2, PhoneCall } from 'lucide-react';
 
 const allCountries = [
@@ -246,6 +249,7 @@ const allCountries = [
 ];
 
 const BDPage: React.FC = () => {
+  const navigate = useNavigate();
   const words = ["Facebook", "Instagram", "WhatsApp", "Telegram"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -330,6 +334,127 @@ const BDPage: React.FC = () => {
 
   // Pricing Calculator State
   const [customersPerMonth, setCustomersPerMonth] = useState<number | ''>('');
+
+  // Custom AI Solution Popups State
+  const [activeModal, setActiveModal] = useState<'voice' | 'automation' | 'custom' | null>(null);
+
+  // 2-Step Order Form Modal State
+  const [selectedPlan, setSelectedPlan] = useState<'Starter' | 'Growth' | 'Pro' | null>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderStep, setOrderStep] = useState<1 | 2>(1);
+  const [copied, setCopied] = useState(false);
+
+  // Contact Form Modal State
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    whatsappNumber: '',
+    businessEmail: '',
+    message: ''
+  });
+  const [contactErrors, setContactErrors] = useState<{[key: string]: string}>({});
+
+  // Order Form Data State
+  const [orderForm, setOrderForm] = useState({
+    businessName: '',
+    platforms: [] as string[],
+    dailyCustomers: '',
+    bkashNumber: ''
+  });
+  const [orderErrors, setOrderErrors] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowOrderModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Sticky Navigator State
+  const [isSticky, setIsSticky] = useState(false);
+  const [activeTab, setActiveTab] = useState('case-study');
+
+  const scrollToAnchor = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const navbarHeight = 72;
+      const stickyBarHeight = 56;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - navbarHeight - stickyBarHeight + 2;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      setActiveTab(id);
+    }
+  };
+
+  useEffect(() => {
+    // 1. Scroll listener for sticky navigation visibility
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    // 2. Intersection observer for highlighting the active section
+    const sectionIds = ['case-study', 'demo', 'pricing', 'custom-solution', 'resources'];
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveTab(entry.target.id);
+        }
+      });
+    };
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: '-30% 0px -60% 0px',
+      threshold: 0
+    };
+    
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    // 3. Initial hash scroll after 150ms on load
+    if (window.location.hash) {
+      const id = window.location.hash.replace('#', '');
+      const timer = setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          scrollToAnchor(id);
+        }
+      }, 150);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        observer.disconnect();
+        clearTimeout(timer);
+      };
+    }
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
+  }, []);
 
   const handleIntroUnmute = () => {
     if (introVideoRef.current && introVideoRef.current.contentWindow) {
@@ -622,55 +747,63 @@ const BDPage: React.FC = () => {
 
   const faqs = [
     {
-      question: "What is Perfectplus Ai?",
-      answer: "Perfectplus Ai is a modern AI platform that builds AI automation and smart business solutions for small, medium, and large businesses. It handles customer inbox replies, order collection, courier tracking, complaint management, real-time updates through Google Sheets, Excel, or your website, and provides advanced Voice AI agents for handling calls."
+      question: "Perfectplus AI কী?",
+      answer: "Perfectplus AI বাংলাদেশের একটি AI Automation Agency। আমরা ছোট ও মাঝারি ব্যবসার জন্য AI Chatbot, Voice AI Agent এবং Business Automation তৈরি করি। আমাদের AI আপনার হয়ে ২৪/৭ Customer দের সাথে কথা বলে, Order নেয় এবং কোনো Lead মিস হতে দেয় না।"
     },
     {
-      question: "How does Perfectplus Ai work for businesses?",
-      answer: "Perfectplus Ai automatically understands and replies to customer messages on your Facebook Page and other platforms. Once trained, it can answer customer queries, share product information, take orders, and handle phone calls with human-like voice agents."
+      question: "Perfectplus AI কিভাবে কাজ করে?",
+      answer: "আমরা প্রথমে আপনার Business সম্পর্কে তথ্য সংগ্রহ করি — Products, Services, প্রায়ই জিজ্ঞাসিত প্রশ্ন। এরপর সেই তথ্য দিয়ে AI Train করা হয়। মাত্র ৩-৫ কার্যদিবসে আপনার Chatbot Live হয়ে স্বয়ংক্রিয়ভাবে Customer দের সাথে কথা বলতে শুরু করে।"
     },
     {
-      question: "What services does Perfectplus Ai provide?",
-      isList: true,
-      items: [
-        "Automated inbox replies",
-        "Human-like Voice AI Agents for inbound/outbound calls",
-        "Order collection & entry into Google Sheets/Excel",
-        "Courier tracking (Pathao / Steadfast)",
-        "Sending product images & information",
-        "Complaint logging & management",
-        "Email notifications"
-      ]
+      question: "কী কী Service পাওয়া যায়?",
+      answer: "AI Chatbot — Messenger, WhatsApp, Instagram, Telegram এ ২৪/৭ automated reply\nVoice AI Agent — AI নিজে Call করে, Lead qualify করে\nAI Automation — Order, Follow-up, Courier Tracking সব automate\nCustom AI Solution — সম্পূর্ণ custom system"
     },
     {
-      question: "How much does Perfectplus Ai cost?",
-      isPricing: true
+      question: "মূল্য কত?",
+      answer: "⭐ Starter — ৳১,৪৯৯/মাস (১,০০০ Customer)\n🔥 Growth — ৳২,৪৯৯/মাস (১,৫০০ Customer)\n💎 Pro — ৳৩,৯৯৯/মাস (৩,০০০ Customer)\n\n১ জন Customer যত Message করুক — ১টাই count হয়। 🎁 ঈদ Special: এখন নিলে Setup Fee সম্পূর্ণ FREE!"
     },
     {
-      question: "Do irrelevant messages count as paid messages?",
-      answer: "No. Only business-related questions are counted as paid messages. Irrelevant or off-topic messages are ignored and not charged."
+      question: "অপ্রাসঙ্গিক Message কি count হয়?",
+      answer: "না। শুধুমাত্র Business-related conversation count হয়। Random বা off-topic message ignore করা হয় এবং charge হয় না।"
     },
     {
-      question: "Can Perfectplus Ai help me increase sales?",
-      answer: "Yes! Since Perfectplus Ai replies to customers instantly and works 24/7, your customer support improves which can lead to more sales and orders."
+      question: "Perfectplus AI কি Sales বাড়াতে পারে?",
+      answer: "হ্যাঁ! AI ২৪/৭ তাৎক্ষণিক reply দেওয়ার কারণে কোনো Customer মিস হয় না। রাত ৩টায়ও Order নেওয়া হয়। আমাদের Clients গড়ে ৩০-৪০% বেশি Conversion পেয়েছেন।"
     },
     {
-      question: "Does Perfectplus Ai only work on Messenger?",
-      answer: "No! Perfectplus Ai works on Facebook Messenger and Instagram."
+      question: "কোন কোন Platform এ কাজ করে?",
+      answer: "Facebook Messenger, WhatsApp, Instagram এবং Telegram — সব platform এ। এছাড়া Voice AI Agent দিয়ে Phone Call ও handle করা যায়।"
     },
     {
-      question: "Do I need to train the AI myself?",
-      answer: "No! You don’t have to train it. The Perfectplus Ai team collects the required information from you and trains the AI for your business."
+      question: "AI কি নিজে Train করতে হবে?",
+      answer: "না। আমাদের Team আপনার কাছ থেকে Business information সংগ্রহ করে AI Train করে। আপনাকে শুধু তথ্য দিতে হবে — বাকি সব আমরা করব।"
     },
     {
-      question: "How long does it take to set up Perfectplus Ai?",
-      answer: "It usually takes 7 business days + 48 hours trial period to fully set up and launch the Perfectplus Ai moderator."
+      question: "Setup করতে কতদিন লাগে?",
+      answer: "মাত্র ৩-৫ কার্যদিবসে আপনার AI Chatbot Live হয়ে যায়। ৭ দিনে সন্তুষ্ট না হলে সম্পূর্ণ টাকা ফেরত দেওয়া হয়।"
     }
   ];
 
+  const SLOTS_TAKEN = 67;
+  const TOTAL_SLOTS = 100;
+  const SLOTS_LEFT = TOTAL_SLOTS - SLOTS_TAKEN;
+  const PROGRESS_PERCENT = (SLOTS_TAKEN / TOTAL_SLOTS) * 100;
+
+  const toBengaliNumber = (num: number | string): string => {
+    const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return num.toString().replace(/\d/g, (digit) => banglaDigits[parseInt(digit)]);
+  };
+
+  const getPlanPrice = (): number => {
+    if (selectedPlan === 'Starter') return 1499;
+    if (selectedPlan === 'Growth') return 2499;
+    if (selectedPlan === 'Pro') return 3999;
+    return 0;
+  };
+
   return (
     <div className="w-full bg-slate-50 min-h-screen font-sans text-slate-900 overflow-x-hidden relative">
-      {/* Styles for marquee animation */}
+      {/* Styles for marquee animation & custom scrollbar hide */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -681,7 +814,97 @@ const BDPage: React.FC = () => {
           width: fit-content;
           animation: marquee 40s linear infinite;
         }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
       `}</style>
+
+      {/* PART B — Sticky Navigator */}
+      <AnimatePresence>
+        {isSticky && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="fixed top-[72px] left-0 right-0 z-45 bg-[#0a0a1a]/95 backdrop-blur-[10px] border-b border-[#7c3aed]/30 shadow-lg"
+            style={{ zIndex: 40 }}
+          >
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              <div className="flex items-center justify-center py-2.5">
+                {/* Centered for tablet and above, horizontally scrollable for mobile */}
+                <div className="w-full flex justify-center gap-2 md:gap-4 py-1 mx-auto">
+                  
+                  {/* Tab 1: Case Study */}
+                  <button
+                    onClick={() => scrollToAnchor('case-study')}
+                    className={`whitespace-nowrap cursor-pointer transition-all duration-300 flex-1 md:flex-initial text-center font-semibold text-xs md:text-sm px-2 md:px-6 py-2 rounded-full ${
+                      activeTab === 'case-study'
+                        ? 'bg-purple-700 text-white rounded-full font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Case Study
+                  </button>
+
+                  {/* Tab 2: Live Demo */}
+                  <button
+                    onClick={() => scrollToAnchor('demo')}
+                    className={`whitespace-nowrap cursor-pointer transition-all duration-300 flex-1 md:flex-initial text-center font-semibold text-xs md:text-sm px-2 md:px-6 py-2 rounded-full ${
+                      activeTab === 'demo'
+                        ? 'bg-purple-700 text-white rounded-full font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Live Demo
+                  </button>
+
+                  {/* Tab 3: Pricing */}
+                  <button
+                    onClick={() => scrollToAnchor('pricing')}
+                    className={`whitespace-nowrap cursor-pointer transition-all duration-300 flex-1 md:flex-initial text-center font-semibold text-xs md:text-sm px-2 md:px-6 py-2 rounded-full ${
+                      activeTab === 'pricing'
+                        ? 'bg-purple-700 text-white rounded-full font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Pricing
+                  </button>
+
+                  {/* Tab: Custom Solution */}
+                  <button
+                    onClick={() => scrollToAnchor('custom-solution')}
+                    className={`whitespace-nowrap cursor-pointer transition-all duration-300 hidden md:block text-center font-semibold text-xs md:text-sm px-4 lg:px-6 py-2 rounded-full flex-shrink-0 ${
+                      activeTab === 'custom-solution'
+                        ? 'bg-purple-700 text-white rounded-full font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Custom Solution
+                  </button>
+
+                  {/* Tab 4: Resources */}
+                  <button
+                    onClick={() => scrollToAnchor('resources')}
+                    className={`whitespace-nowrap cursor-pointer transition-all duration-300 hidden md:block text-center font-semibold text-xs md:text-sm px-4 lg:px-6 py-2 rounded-full flex-shrink-0 ${
+                      activeTab === 'resources'
+                        ? 'bg-purple-700 text-white rounded-full font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Resources
+                  </button>
+
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
       <motion.section 
@@ -691,7 +914,6 @@ const BDPage: React.FC = () => {
         transition={{ duration: 0.6 }}
         className="relative w-full py-20 md:py-32 overflow-hidden bg-[#020617] text-white border-b border-slate-800"
       >
-        
         {/* Ambient Glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] md:w-[1000px] h-[600px] bg-brand-purple/20 blur-[120px] rounded-full pointer-events-none z-0" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none z-0" />
@@ -713,17 +935,20 @@ const BDPage: React.FC = () => {
             </span>
             </a>
 
-            {/* Headline with Rotating Text */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight tracking-tight mb-8 max-w-7xl mx-auto">
-            <span className="block text-slate-300">
+            {/* Headline with Rotating Text and Bengali 24/7 Question */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-sans font-bold text-white leading-tight tracking-tight mb-8 max-w-7xl mx-auto flex flex-col gap-4">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 font-extrabold text-3xl md:text-5xl lg:text-6xl">
+                আপনার Business কি ২৪/৭ চলে?
+              </span>
+              <span className="block text-slate-300 font-serif text-3xl md:text-5xl lg:text-6xl">
                 Turn <span className={`inline-block transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'} text-transparent bg-clip-text bg-gradient-to-r from-white via-violet-400 to-violet-600`}>{words[currentWordIndex]}</span> Conversations
-            </span>
-            <span className="relative inline-block mt-2">
-                <span className="absolute -inset-2 bg-gradient-to-r from-brand-purple/20 to-blue-500/20 blur-xl rounded-full"></span>
-                <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient-x">
-                Into Potential Revenue.
-                </span>
-            </span>
+              </span>
+              <span className="relative inline-block mt-2">
+                  <span className="absolute -inset-2 bg-gradient-to-r from-brand-purple/20 to-blue-500/20 blur-xl rounded-full"></span>
+                  <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient-x font-serif text-3xl md:text-5xl lg:text-6xl">
+                    Into Potential Revenue.
+                  </span>
+              </span>
             </h1>
 
             {/* Subheadline */}
@@ -733,7 +958,7 @@ const BDPage: React.FC = () => {
             </p>
 
             {/* Browser Window Video Container */}
-            <div className="relative w-full max-w-5xl mb-16 transform hover:scale-[1.01] transition-transform duration-500">
+            <div className="relative w-full max-w-5xl mb-16 transform hover:scale-[1.01] transition-transform duration-500 animate-fade-in">
             {/* Browser Frame */}
             <div className="rounded-t-2xl bg-slate-900 border-b border-slate-800 p-3 flex items-center gap-2 shadow-2xl">
                 <div className="flex gap-2 mr-4">
@@ -782,8 +1007,10 @@ const BDPage: React.FC = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 w-full mb-16">
-            <div 
-                onClick={scrollToForm}
+            <a 
+                href="https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="relative flex items-center bg-white text-slate-900 rounded-full p-1.5 pr-8 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-2xl hover:shadow-white/20 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group w-full md:w-auto max-w-md"
             >
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-slate-100 mr-4 flex-shrink-0 bg-brand-purple/20 relative">
@@ -794,21 +1021,23 @@ const BDPage: React.FC = () => {
                 />
                 </div>
                 <div className="flex flex-col text-left">
-                <span className="font-bold text-lg leading-tight">Connect With Us</span>
+                <span className="font-bold text-lg leading-tight text-slate-900">Connect With Us</span>
                 <span className="text-xs text-slate-500 font-medium mt-0.5 group-hover:text-brand-purple transition-colors">Speak with Mehedi</span>
                 </div>
-            </div>
+            </a>
 
             <a 
-                href="tel:01887633339"
+                href="https://wa.me/8801887633339"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="relative flex items-center bg-white/10 backdrop-blur-md text-white rounded-full p-1.5 pr-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white/20 group w-full md:w-auto max-w-md"
             >
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20 mr-4 flex-shrink-0 bg-green-500 relative flex items-center justify-center">
                     <PhoneCall className="w-7 h-7 text-white animate-pulse" />
                 </div>
-                <div className="flex flex-col text-left">
+                <div className="flex flex-col text-left text-white">
                 <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg leading-tight">Direct Hotline OR Whatsup</span>
+                    <span className="font-bold text-lg leading-tight">Direct Hotline OR Whatsapp</span>
                 </div>
                 <span className="text-xs text-slate-300 font-medium mt-0.5">01887633339</span>
                 </div>
@@ -816,7 +1045,7 @@ const BDPage: React.FC = () => {
             </div>
 
             {/* Trusted By Section */}
-            <div className="w-full max-w-4xl border-t border-slate-800 pt-8">
+            <div className="w-full max-w-4xl border-t border-slate-800 pt-8 animate-fade-in delay-300">
                 <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Trusted By Industry Leaders</p>
                 <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
                 <div className="flex items-center gap-2 font-bold text-xl text-slate-400"><Globe size={24}/> GlobalTech</div>
@@ -828,11 +1057,9 @@ const BDPage: React.FC = () => {
         </div>
       </motion.section>
 
-
-
       {/* Customer Stories Section */}
       <motion.section 
-        id="customer-stories" 
+        id="case-study" 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -849,14 +1076,14 @@ const BDPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
                 <div className="inline-block bg-yellow-100 border border-yellow-200 px-4 py-1.5 rounded-full mb-6">
-                    <span className="text-sm font-bold text-yellow-800 tracking-wide uppercase">Customer Stories</span>
+                    <span className="text-sm font-bold text-yellow-800 tracking-wide uppercase">গ্রাহকদের অভিজ্ঞতা</span>
                 </div>
                 <h2 className="text-4xl md:text-6xl font-serif font-bold text-slate-900 mb-6 leading-tight">
-                    Our clients don't just use it, <br/>
-                    <span className="text-brand-purple">they rely on it.</span>
+                    আমাদের client রা শুধু ব্যবহার করেন না — <br/>
+                    <span className="text-brand-purple">তারা নির্ভর করেন।</span>
                 </h2>
                 <button className="px-8 py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition-colors shadow-lg">
-                    Explore Customer Stories
+                    সব সাফল্যের গল্প দেখুন
                 </button>
             </div>
 
@@ -876,170 +1103,173 @@ const BDPage: React.FC = () => {
                      
                      {/* Screen Content */}
                      <div className="relative w-full h-full bg-slate-900 flex items-center justify-center group/video">
-                         <iframe
-                            ref={testimonialIframeRef}
-                            className="w-full h-full object-cover"
-                            src="https://www.youtube.com/embed/rA623LfnghE?autoplay=1&mute=1&loop=1&playlist=rA623LfnghE&enablejsapi=1&controls=1&modestbranding=1&rel=0"
-                            title="RT BrandUp Testimonial"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                         ></iframe>
+                          <iframe
+                             ref={testimonialIframeRef}
+                             className="w-full h-full object-cover"
+                             src="https://www.youtube.com/embed/rA623LfnghE?autoplay=1&mute=1&loop=1&playlist=rA623LfnghE&enablejsapi=1&controls=1&modestbranding=1&rel=0"
+                             title="RT BrandUp Testimonial"
+                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                             allowFullScreen
+                          ></iframe>
 
-                         {/* Click overlay to unmute and reveal controls */}
-                         {!hasTestimonialInteracted && (
-                           <div 
-                              onClick={handleTestimonialUnmute}
-                              className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors z-10"
-                           >
-                              <div className="p-4 rounded-full bg-black/50 backdrop-blur-sm transition-opacity duration-300 opacity-0 group-hover/video:opacity-100">
-                                  <Volume2 className="w-8 h-8 text-white" />
-                              </div>
-                              
-                              {/* Mute Indicator */}
-                              <div className="absolute bottom-8 right-8 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md pointer-events-none flex items-center gap-2 animate-pulse">
-                                  <Volume2 className="w-4 h-4" />
-                                  Click to Unmute
-                              </div>
-                           </div>
-                         )}
+                          {/* Click overlay to unmute and reveal controls */}
+                          {!hasTestimonialInteracted && (
+                            <div 
+                               onClick={handleTestimonialUnmute}
+                               className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors z-10"
+                            >
+                               <div className="p-4 rounded-full bg-black/50 backdrop-blur-sm transition-opacity duration-300 opacity-0 group-hover/video:opacity-100">
+                                   <Volume2 className="w-8 h-8 text-white" />
+                               </div>
+                               
+                               {/* Mute Indicator */}
+                               <div className="absolute bottom-8 right-8 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md pointer-events-none flex items-center gap-2 animate-pulse">
+                                   <Volume2 className="w-4 h-4" />
+                                   Click to Unmute
+                               </div>
+                            </div>
+                          )}
+                      </div>
+                  </div>
+                  
+                  {/* Stats Overlay/Section below video */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-brand-purple/50 transition-colors text-center">
+                          <h4 className="text-3xl font-bold text-brand-purple mb-1">১০০+</h4>
+                          <p className="text-sm text-slate-500 font-medium uppercase">ঘণ্টা বাঁচে প্রতি মাসে</p>
+                       </div>
+                       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-blue-500/50 transition-colors text-center">
+                          <h4 className="text-3xl font-bold text-blue-600 mb-1">২৪/৭</h4>
+                          <p className="text-sm text-slate-500 font-medium uppercase">সক্রিয় থাকে</p>
+                       </div>
+                       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-green-500/50 transition-colors text-center">
+                          <h4 className="text-3xl font-bold text-green-600 mb-1">৩গুণ</h4>
+                          <p className="text-sm text-slate-500 font-medium uppercase">দ্রুত সাড়া দেয়</p>
+                       </div>
+                       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-pink-500/50 transition-colors text-center">
+                          <h4 className="text-3xl font-bold text-pink-600 mb-1">শূন্য</h4>
+                          <p className="text-sm text-slate-500 font-medium uppercase">মিসড লিড</p>
+                       </div>
+                  </div>
+             </div>
+
+             <motion.div 
+               variants={containerVariants}
+               initial="hidden"
+               whileInView="visible"
+               viewport={{ once: true, margin: "-100px" }}
+               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+             >
+                 {/* Story 1 */}
+                 <motion.div variants={itemVariants} className="bg-green-50 p-8 rounded-3xl border border-green-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">রাত ৩টায়ও Reply যায়</h3>
+                     <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-4">চব্বিশ ঘণ্টা, সাত দিন</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "Perfectplus AI আমাদের সব customer এর প্রশ্নের উত্তর সাথে সাথে দিয়ে দেয়। আগে রাতে customer মেসেজ করলে হারিয়ে যেত, এখন আমাদের sales ৪০% বেড়ে গেছে — কারণ AI কখনো ঘুমায় না।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-green-200">
+                         <p className="font-bold text-slate-900">আবির হাসান</p>
+                         <p className="text-xs text-slate-500">Founder, UrbanDhaka</p>
                      </div>
-                 </div>
-                 
-                 {/* Stats Overlay/Section below video */}
-                 <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-brand-purple/50 transition-colors text-center">
-                         <h4 className="text-3xl font-bold text-brand-purple mb-1">100+</h4>
-                         <p className="text-sm text-slate-500 font-medium uppercase">Hours Saved / Month</p>
-                      </div>
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-blue-500/50 transition-colors text-center">
-                         <h4 className="text-3xl font-bold text-blue-600 mb-1">24/7</h4>
-                         <p className="text-sm text-slate-500 font-medium uppercase">Active Availability</p>
-                      </div>
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-green-500/50 transition-colors text-center">
-                         <h4 className="text-3xl font-bold text-green-600 mb-1">3X</h4>
-                         <p className="text-sm text-slate-500 font-medium uppercase">Faster Response</p>
-                      </div>
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 hover:border-pink-500/50 transition-colors text-center">
-                         <h4 className="text-3xl font-bold text-pink-600 mb-1">Zero</h4>
-                         <p className="text-sm text-slate-500 font-medium uppercase">Missed Leads</p>
-                      </div>
-                 </div>
-            </div>
+                 </motion.div>
 
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-                {/* Story 1 */}
-                <motion.div variants={itemVariants} className="bg-green-50 p-8 rounded-3xl border border-green-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">24/7 Support</h3>
-                    <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-4">Instant Replies</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "Perfectplus Ai handles all our customer queries instantly. We used to lose customers at night, but now our sales have increased by 40% because the AI never sleeps."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-green-200">
-                        <p className="font-bold text-slate-900">Abir Hasan</p>
-                        <p className="text-xs text-slate-500">Founder, UrbanDhaka</p>
-                    </div>
-                </motion.div>
+                 {/* Story 2 */}
+                 <motion.div variants={itemVariants} className="bg-blue-50 p-8 rounded-3xl border border-blue-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">একটা Order ও মিস হয়নি</h3>
+                     <p className="text-sm font-bold text-blue-700 uppercase tracking-wide mb-4">কোনো মিস নেই</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "প্রতিটা comment আর message সেকেন্ডের ভেতরে reply পায়। Order নিজে নিজে collect হয়ে Google Sheet এ চলে যায়। মনে হয় ১০ জনের একটা পুরো team কাজ করছে।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-blue-200">
+                         <p className="font-bold text-slate-900">ফারহানা আক্তার</p>
+                         <p className="text-xs text-slate-500">Owner, GlowSkin BD</p>
+                     </div>
+                 </motion.div>
 
-                {/* Story 2 */}
-                <motion.div variants={itemVariants} className="bg-blue-50 p-8 rounded-3xl border border-blue-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Zero Missed</h3>
-                    <p className="text-sm font-bold text-blue-700 uppercase tracking-wide mb-4">Automated Sales</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "Every comment and message gets a reply within seconds. It collects orders automatically and sends them to our Google Sheet. It's like having a team of 10 people."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-blue-200">
-                        <p className="font-bold text-slate-900">Farhana Akter</p>
-                        <p className="text-xs text-slate-500">Owner, GlowSkin BD</p>
-                    </div>
-                </motion.div>
+                 {/* Story 3 */}
+                 <motion.div variants={itemVariants} className="bg-pink-50 p-8 rounded-3xl border border-pink-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">দিনে ৬ ঘণ্টা বেঁচে গেল</h3>
+                     <p className="text-sm font-bold text-pink-700 uppercase tracking-wide mb-4">সময় বাঁচলে মাথা খোলে</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "আগে প্রতিদিন ৬ ঘণ্টা শুধু message reply করতাম। এখন Perfectplus AI এটা করে দেয়, আমি নতুন product খুঁজতে আর business বাড়াতে সময় দিতে পারছি।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-pink-200">
+                         <p className="font-bold text-slate-900">মাহমুদুল হক</p>
+                         <p className="text-xs text-slate-500">CEO, GadgetMart</p>
+                     </div>
+                 </motion.div>
 
-                {/* Story 3 */}
-                <motion.div variants={itemVariants} className="bg-pink-50 p-8 rounded-3xl border border-pink-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Time Saver</h3>
-                    <p className="text-sm font-bold text-pink-700 uppercase tracking-wide mb-4">Focus on Growth</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "I used to spend 6 hours a day replying to messages. Now Perfectplus Ai does it for me. I can finally focus on sourcing new products and expanding my business."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-pink-200">
-                        <p className="font-bold text-slate-900">Mahmudul Haque</p>
-                        <p className="text-xs text-slate-500">CEO, GadgetMart</p>
-                    </div>
-                </motion.div>
+                 {/* Story 4 */}
+                 <motion.div variants={itemVariants} className="bg-yellow-50 p-8 rounded-3xl border border-yellow-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">Bot মনেই হয় না কাউকে</h3>
+                     <p className="text-sm font-bold text-yellow-700 uppercase tracking-wide mb-4">Professional পরিচয়</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "AI টা একদম একজন trained human agent এর মতো কথা বলে। Customer রা ধরতেই পারে না যে bot এর সাথে কথা বলছে। আমাদের brand এর image এখন অনেক উপরে।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-yellow-250">
+                         <p className="font-bold text-slate-900">নাদিয়া ইসলাম</p>
+                         <p className="text-xs text-slate-500">Director, LuxeInteriors</p>
+                     </div>
+                 </motion.div>
 
-                {/* Story 4 */}
-                <motion.div variants={itemVariants} className="bg-yellow-50 p-8 rounded-3xl border border-yellow-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Professional</h3>
-                    <p className="text-sm font-bold text-yellow-700 uppercase tracking-wide mb-4">Brand Image</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "The AI speaks exactly like a professional human agent. My customers can't even tell they are talking to a bot. It has improved our brand image significantly."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-yellow-200">
-                        <p className="font-bold text-slate-900">Nadia Islam</p>
-                        <p className="text-xs text-slate-500">Director, LuxeInteriors</p>
-                    </div>
-                </motion.div>
+                  {/* Story 5 */}
+                 <motion.div variants={itemVariants} className="bg-green-50 p-8 rounded-3xl border border-green-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">Staff এর অর্ধেক খরচে দ্বিগুণ কাজ</h3>
+                     <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-4">টাকার সেরা ব্যবহার</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "Support staff রাখতে প্রচুর খরচ পড়ত। Perfectplus AI সেই কাজটাই করে অনেক কম টাকায়, তাও একদিনও বিরতি ছাড়া। Investment এর return অবিশ্বাস্য।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-green-200">
+                         <p className="font-bold text-slate-900">রাহিম উদ্দিন</p>
+                         <p className="text-xs text-slate-500">Manager, FoodiesHub</p>
+                     </div>
+                 </motion.div>
 
-                 {/* Story 5 */}
-                <motion.div variants={itemVariants} className="bg-green-50 p-8 rounded-3xl border border-green-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Cost Effective</h3>
-                    <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-4">High ROI</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "Hiring support staff was expensive. Perfectplus Ai costs a fraction of that and works 24/7 without any breaks. The return on investment has been incredible for us."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-green-200">
-                        <p className="font-bold text-slate-900">Rahim Uddin</p>
-                        <p className="text-xs text-slate-500">Manager, FoodiesHub</p>
-                    </div>
-                </motion.div>
+                  {/* Story 6 */}
+                 <motion.div variants={itemVariants} className="bg-blue-50 p-8 rounded-3xl border border-blue-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">মাত্র ৭ দিনেই Live হয়ে গেল</h3>
+                     <p className="text-sm font-bold text-blue-700 uppercase tracking-wide mb-4">ঝামেলাহীন শুরু</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "ভেবেছিলাম AI বসানো অনেক কঠিন হবে, কিন্তু team সব নিজেরাই করে দিয়েছে। মাত্র ৭ দিনে AI agent live হয়ে order নেওয়া শুরু করেছে। পুরো process টা ছিল অবাক করার মতো।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-blue-200">
+                         <p className="font-bold text-slate-900">সাদিয়া রহমান</p>
+                         <p className="text-xs text-slate-500">Owner, ModestWear</p>
+                     </div>
+                 </motion.div>
 
-                 {/* Story 6 */}
-                <motion.div variants={itemVariants} className="bg-blue-50 p-8 rounded-3xl border border-blue-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Easy Setup</h3>
-                    <p className="text-sm font-bold text-blue-700 uppercase tracking-wide mb-4">Hassle Free</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "I thought setting up AI would be hard, but the team handled everything. Within 7 days, my AI agent was live and taking orders. The process was super smooth."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-blue-200">
-                        <p className="font-bold text-slate-900">Sadia Rahman</p>
-                        <p className="text-xs text-slate-500">Owner, ModestWear</p>
-                    </div>
-                </motion.div>
+                  {/* Story 7 */}
+                 <motion.div variants={itemVariants} className="bg-pink-50 p-8 rounded-3xl border border-pink-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">হাজারো Message — একটুও সমস্যা হয়নি</h3>
+                     <p className="text-sm font-bold text-pink-700 uppercase tracking-wide mb-4">যত চাপ তত সামলায়</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "ঈদের সেলে হাজারো message আসে একসাথে। Perfectplus AI সবগুলো handle করেছে — একটুও crash হয়নি, দেরি হয়নি। এই সিজনে একটা order ও miss হয়নি।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-pink-200">
+                         <p className="font-bold text-slate-900">কামরুল ইসলাম</p>
+                         <p className="text-xs text-slate-500">CEO, TechValley</p>
+                     </div>
+                 </motion.div>
 
-                 {/* Story 7 */}
-                <motion.div variants={itemVariants} className="bg-pink-50 p-8 rounded-3xl border border-pink-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Scalable</h3>
-                    <p className="text-sm font-bold text-pink-700 uppercase tracking-wide mb-4">Handles Traffic</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "During Eid sales, we get thousands of messages. Perfectplus Ai handled them all without crashing or delaying. We didn't miss a single order this season."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-pink-200">
-                        <p className="font-bold text-slate-900">Kamrul Islam</p>
-                        <p className="text-xs text-slate-500">CEO, TechValley</p>
-                    </div>
-                </motion.div>
+                  {/* Story 8 */}
+                 <motion.div variants={itemVariants} className="bg-yellow-50 p-8 rounded-3xl border border-yellow-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                     <h3 className="text-2xl font-extrabold text-slate-900 mb-2">Customer কী চায় জানা গেল</h3>
+                     <p className="text-sm font-bold text-yellow-700 uppercase tracking-wide mb-4">ডেটা দিয়ে সিদ্ধান্ত</p>
+                     <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
+                         "শুধু reply করে না, customer কী জিজ্ঞেস করছে সেটার পুরো data দেয়। এই insights দিয়ে আমরা inventory ঠিক করেছি। আমাদের পুরো strategy তেই এটা game changer হয়ে গেছে।"
+                     </p>
+                     <div className="mt-auto pt-4 border-t border-yellow-250">
+                         <p className="font-bold text-slate-900">তাসনিম জারা</p>
+                         <p className="text-xs text-slate-500">Marketing Head, BeautyBox</p>
+                     </div>
+                 </motion.div>
 
-                 {/* Story 8 */}
-                <motion.div variants={itemVariants} className="bg-yellow-50 p-8 rounded-3xl border border-yellow-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <h3 className="text-3xl font-extrabold text-slate-900 mb-2">Data Driven</h3>
-                    <p className="text-sm font-bold text-yellow-700 uppercase tracking-wide mb-4">Smart Insights</p>
-                    <p className="text-slate-700 mb-6 leading-relaxed flex-grow">
-                        "Not just replies, it gives us data on what customers are asking. We improved our inventory based on the AI's insights. It's a game changer for our strategy."
-                    </p>
-                    <div className="mt-auto pt-4 border-t border-yellow-200">
-                        <p className="font-bold text-slate-900">Tasnim Jara</p>
-                        <p className="text-xs text-slate-500">Marketing Head, BeautyBox</p>
-                    </div>
-                </motion.div>
-
-            </motion.div>
+             </motion.div>
         </div>
       </motion.section>
+
+
+
 
       {/* 1. Scrolling Text Marquee */}
       <motion.section 
@@ -1393,112 +1623,467 @@ const BDPage: React.FC = () => {
          {/* Background Glows */}
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-16">
-               <h2 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6">
-                  Pricing
+         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            {/* PART B — Eid Banner */}
+            <div className="bg-[#111827]/80 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 border border-purple-500/30 max-w-4xl mx-auto mb-16 relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent pointer-events-none"></div>
+               <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="inline-block bg-purple-900/40 border border-purple-500/40 px-4 py-1.5 rounded-full mb-4">
+                     <span className="text-sm font-bold text-purple-300 tracking-wide">🎁 সীমিত সময়ের অফার</span>
+                  </div>
+                  <h3 className="text-2xl md:text-4xl font-bold text-white mb-6 leading-tight">
+                     ঈদ স্পেশাল — Setup Fee সম্পূর্ণ বিনামূল্যে
+                  </h3>
+                  
+                  <div className="w-full max-w-2xl">
+                     {/* progress bar */}
+                     <div className="w-full bg-slate-800 rounded-full h-4 overflow-hidden mb-3">
+                        <div 
+                           className="bg-[#7c3aed] h-full rounded-full transition-all duration-500" 
+                           style={{ width: `${PROGRESS_PERCENT}%` }}
+                        ></div>
+                     </div>
+                     <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-sm md:text-base">
+                        <span className="text-slate-300 font-medium">{SLOTS_TAKEN} জন Business Owner ইতিমধ্যে শুরু করেছেন</span>
+                        <span className="text-red-400 font-semibold flex items-center gap-1">মাত্র {SLOTS_LEFT}টি স্লট বাকি ⚠️</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            {/* PART C — Section Title */}
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+               <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight">
+                  আপনার Business এর সাইজ অনুযায়ী Plan বেছে নিন
                </h2>
-               <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                  Simple, transparent pricing tailored to your business needs.
+               <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+                  ১ জন Customer ১০০টা Message করলেও সেটা মাত্র ১টি Conversation — আপনি pay করেন customer এর সংখ্যায়, message এ নয়।
                </p>
             </div>
 
-            <div className="bg-[#131B2C]/80 backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row gap-8 shadow-2xl shadow-black/50 border border-slate-800 relative overflow-hidden">
-              
-              {/* Decorative gradient line */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-purple to-blue-500"></div>
+            {/* PART D — 3 Pricing Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch pt-4">
+               
+               {/* CARD 1: Starter */}
+               <div className="bg-[#1e293b]/90 backdrop-blur-md border border-slate-700 rounded-3xl p-8 flex flex-col justify-between hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transition-all duration-300 relative group">
+                  <div>
+                     <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-2">শুরু করার জন্য সেরা</span>
+                     <h3 className="text-2xl font-bold text-white mb-4">Starter</h3>
+                     <div className="flex items-baseline gap-1 mb-3">
+                        <span className="text-4xl font-extrabold text-white">৳১,৪৯৯</span>
+                        <span className="text-slate-400 text-sm">/মাস</span>
+                     </div>
+                     
+                     <div className="text-sm mb-6 flex flex-wrap gap-2 items-center">
+                        <span className="line-through text-slate-500">Setup Fee: ৳১,৯৯৯</span>
+                        <span className="text-green-400 font-semibold">→ এখন FREE 🎁</span>
+                     </div>
 
-              {/* Left Column - Subscription */}
-              <div className="bg-slate-900/50 rounded-3xl p-8 border border-slate-800 flex-1 flex flex-col relative group hover:border-brand-purple/50 transition-colors duration-300">
-                <h3 className="text-2xl font-bold text-white text-center mb-6">Subscription</h3>
-                
-                <div className="flex justify-center mb-8">
-                  <div className="bg-brand-purple/20 rounded-full p-1 flex">
-                    <button className="bg-brand-purple text-white px-8 py-2 rounded-full text-sm font-bold shadow-md shadow-brand-purple/20">Monthly</button>
-                  </div>
-                </div>
+                     <div className="border-t border-slate-800 pt-4 mb-6 space-y-1">
+                        <p className="text-sm text-slate-400">নিয়মিত: ৫০০ Customer/মাস</p>
+                        <p className="text-md font-bold text-purple-400">ঈদ অফারে: ১,০০০ Customer/মাস 🔥</p>
+                     </div>
 
-                <div className="text-center mb-8">
-                  <div className="text-4xl font-extrabold text-brand-purple mb-2">Tk. 999 <span className="text-lg text-slate-400 font-medium">/ month</span></div>
-                  <div className="text-sm text-slate-400 flex items-center justify-center gap-1.5 font-medium">
-                    & Tk. 2.90 per customer (AI cost)
-                    <AlertCircle className="w-4 h-4 text-brand-purple" />
+                     <ul className="space-y-4 mb-8 text-sm">
+                        {[
+                           "তাৎক্ষণিক Reply",
+                           "২৪/৭ সক্রিয়",
+                           "আপনার Business এ Train করা",
+                           "১০০+ Customer একসাথে",
+                           "Image ও Voice বুঝতে পারে",
+                           "Orders Google Sheet এ",
+                           "Human এ Transfer",
+                           "৩-৫ কার্যদিবসে Live"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
                   </div>
-                </div>
 
-                <div className="mb-8 bg-slate-800/50 p-5 rounded-2xl shadow-sm border border-slate-700">
-                  <h4 className="text-center text-slate-300 font-semibold mb-4 text-sm">Calculate Your Monthly Cost</h4>
-                  <div className="relative">
-                    <input 
-                      type="number" 
-                      placeholder="Enter customers per month"
-                      value={customersPerMonth}
-                      onChange={(e) => setCustomersPerMonth(e.target.value ? Number(e.target.value) : '')}
-                      className="w-full bg-slate-900/50 border-2 border-slate-700 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10 text-sm font-medium transition-all placeholder:text-slate-500"
-                    />
-                  </div>
-                </div>
+                  <button 
+                     onClick={() => {
+                        setSelectedPlan('Starter');
+                        setOrderStep(1);
+                        setOrderForm({ businessName: '', platforms: ['Facebook Messenger'], dailyCustomers: '', bkashNumber: '' });
+                        setOrderErrors({});
+                        setShowOrderModal(true);
+                     }}
+                     className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
+                  >
+                     🛒 এখনই অর্ডার করুন →
+                  </button>
+               </div>
 
-                <div className="space-y-4 text-sm mt-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 shadow-sm">
-                  <div className="flex justify-between border-b border-slate-700 pb-3">
-                    <span className="text-slate-400 font-medium">Customers</span>
-                    <span className="font-bold text-white">{customersPerMonth || 0}</span>
+               {/* CARD 2: Growth (HIGHLIGHTED) */}
+               <div className="bg-[#1e293b]/95 backdrop-blur-md border-[3px] border-purple-500 rounded-3xl p-8 flex flex-col justify-between hover:shadow-[0_0_35px_rgba(124,58,237,0.45)] transition-all duration-300 relative group lg:-translate-y-4 shadow-[0_0_25px_rgba(124,58,237,0.25)] z-10">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase flex items-center gap-1 whitespace-nowrap shadow-md">
+                     ⭐ সবচেয়ে জনপ্রিয়
                   </div>
-                  <div className="flex justify-between border-b border-slate-700 pb-3">
-                    <span className="text-slate-400 font-medium">AI Cost (pay as you go)</span>
-                    <span className="font-bold text-white">Tk. {((Number(customersPerMonth) || 0) * 2.90).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-700 pb-3">
-                    <span className="text-slate-400 font-medium">Subscription (Monthly)</span>
-                    <span className="font-bold text-white">Tk. 999.00</span>
-                  </div>
-                  <div className="flex justify-between pt-2 items-center">
-                    <span className="font-bold text-white text-base">Total Monthly Cost:</span>
-                    <span className="font-extrabold text-xl text-brand-purple">Tk. {(((Number(customersPerMonth) || 0) * 2.90) + 999).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
+                  
+                  <div>
+                     <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-2 mt-2">সেরা ভ্যালু</span>
+                     <h3 className="text-2xl font-bold text-white mb-4">Growth</h3>
+                     <div className="flex items-baseline gap-1 mb-3">
+                        <span className="text-4xl font-extrabold text-white">৳২,৪৯৯</span>
+                        <span className="text-slate-400 text-sm">/মাস</span>
+                     </div>
+                     
+                     <div className="text-sm mb-6 flex flex-wrap gap-2 items-center">
+                        <span className="line-through text-slate-500">Setup Fee: ৳১,৯৯৯</span>
+                        <span className="text-green-400 font-semibold">→ এখন FREE 🎁</span>
+                     </div>
 
-              {/* Right Column - Features */}
-              <div className="bg-slate-900/50 rounded-3xl p-8 border border-slate-800 flex-1 flex flex-col hover:border-brand-purple/50 transition-colors duration-300">
-                <h3 className="text-2xl font-bold text-white text-center mb-8">What's Included</h3>
-                
-                <ul className="space-y-5">
-                  {[
-                    "Instant reply",
-                    "24/7 Service",
-                    "Trained on your business",
-                    "Connect your website/database",
-                    "Send replies to 100+ customers simultaneously",
-                    "Can read image and voice",
-                    "Manual pause option",
-                    "Orders in google sheets",
-                    "Handle customer queries",
-                    "Take orders on website",
-                    "Courier tracking",
-                    "Transfer to human agent"
-                  ].map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="mt-0.5 bg-brand-purple/20 p-1 rounded-full flex-shrink-0">
-                        <Check className="w-4 h-4 text-brand-purple" strokeWidth={3} />
-                      </div>
-                      <span className="text-slate-300 font-medium text-sm leading-relaxed">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="mt-auto pt-8">
-                   <button 
-                     onClick={scrollToForm}
-                     className="w-full py-4 bg-gradient-to-r from-brand-purple to-blue-600 hover:from-brand-purple/90 hover:to-blue-600/90 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-brand-purple/25 transform hover:-translate-y-0.5"
-                   >
-                     Get Started Now
-                   </button>
-                </div>
-              </div>
+                     <div className="border-t border-slate-800 pt-4 mb-6 space-y-1">
+                        <p className="text-sm text-slate-400">নিয়মিত: ১,০০০ Customer/মাস</p>
+                        <p className="text-md font-bold text-purple-400">ঈদ অফারে: ১,৫০০ Customer/মাস 🔥</p>
+                     </div>
+
+                     <ul className="space-y-4 mb-8 text-sm">
+                        {[
+                           "Starter এর সব সুবিধা",
+                           "Website/Database Connect",
+                           "Courier Tracking",
+                           "Manual Pause Option",
+                           "Website এ Order Management",
+                           "Priority Support"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+
+                  <button 
+                     onClick={() => {
+                        setSelectedPlan('Growth');
+                        setOrderStep(1);
+                        setOrderForm({ businessName: '', platforms: ['Facebook Messenger'], dailyCustomers: '', bkashNumber: '' });
+                        setOrderErrors({});
+                        setShowOrderModal(true);
+                     }}
+                     className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                  >
+                     🛒 এখনই অর্ডার করুন →
+                  </button>
+               </div>
+
+               {/* CARD 3: Pro */}
+               <div className="bg-[#1e293b]/90 backdrop-blur-md border border-slate-700 rounded-3xl p-8 flex flex-col justify-between hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transition-all duration-300 relative group">
+                  <div>
+                     <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-2">বড় Business এর জন্য</span>
+                     <h3 className="text-2xl font-bold text-white mb-4">Pro</h3>
+                     <div className="flex items-baseline gap-1 mb-3">
+                        <span className="text-4xl font-extrabold text-white">৳৩,৯৯৯</span>
+                        <span className="text-slate-400 text-sm">/মাস</span>
+                     </div>
+                     
+                     <div className="text-sm mb-6 flex flex-wrap gap-2 items-center">
+                        <span className="line-through text-slate-500">Setup Fee: ৳১,৯৯৯</span>
+                        <span className="text-green-400 font-semibold">→ এখন FREE 🎁</span>
+                     </div>
+
+                     <div className="border-t border-slate-800 pt-4 mb-6 space-y-1">
+                        <p className="text-sm text-slate-400">নিয়মিত: ২,০০০ Customer/মাস</p>
+                        <p className="text-md font-bold text-purple-400">ঈদ অফারে: ৩,০০০ Customer/মাস 🔥</p>
+                     </div>
+
+                     <ul className="space-y-4 mb-8 text-sm">
+                        {[
+                           "Growth এর সব সুবিধা",
+                           "Custom AI Personality",
+                           "Advanced Analytics",
+                           "Custom Integration",
+                           "Dedicated Support"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+
+                  <button 
+                     onClick={() => {
+                        setSelectedPlan('Pro');
+                        setOrderStep(1);
+                        setOrderForm({ businessName: '', platforms: ['Facebook Messenger'], dailyCustomers: '', bkashNumber: '' });
+                        setOrderErrors({});
+                        setShowOrderModal(true);
+                     }}
+                     className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
+                  >
+                     🛒 এখনই অর্ডার করুন →
+                  </button>
+               </div>
 
             </div>
+
+            {/* PART E — Trust Bar */}
+            <div className="mt-16 text-center max-w-3xl mx-auto">
+               <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-slate-300 font-medium text-md mb-6 border-b border-slate-800 pb-6">
+                  <div className="flex items-center gap-2">
+                     <span className="text-yellow-400 text-lg">⚡</span>
+                     <span>৩-৫ কার্যদিবসে Live</span>
+                  </div>
+                  <span className="hidden md:inline text-slate-600">•</span>
+                  <div className="flex items-center gap-2">
+                     <span className="text-green-400 text-lg">🛡️</span>
+                     <span>৭ দিনে সন্তুষ্ট না হলে টাকা ফেরত</span>
+                  </div>
+                  <span className="hidden md:inline text-slate-600">•</span>
+                  <div className="flex items-center gap-2">
+                     <span className="text-indigo-400 text-lg">🔒</span>
+                     <span>কোনো Hidden Charge নেই</span>
+                  </div>
+               </div>
+               <p className="text-sm italic text-slate-400 font-light">
+                  ঈদের পর Setup Fee ৳১,৯৯৯ আবার যোগ হবে। এখনই নিলে এই টাকাটা সম্পূর্ণ বাঁচছেন।
+               </p>
+            </div>
+
          </div>
+      </motion.section>
+
+      {/* Custom Solution Section */}
+      <motion.section 
+        id="custom-solution" 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="py-32 bg-[#0B0F19] relative overflow-hidden text-white"
+      >
+         {/* Grid Background */}
+         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
+         
+         {/* Background Glows */}
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* TOP BADGE */}
+            <div className="flex justify-center mb-4">
+               <span className="bg-purple-600 text-white font-bold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider">
+                  কাস্টম সমাধান
+               </span>
+            </div>
+
+            {/* HEADING */}
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+               <h2 className="text-3xl md:text-5xl font-serif font-bold leading-tight">
+                  আপনার Business এর জন্য <br />
+                  <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">তৈরি AI Solution</span>
+               </h2>
+               <p className="text-slate-400 mt-4 text-sm md:text-base max-w-2xl mx-auto">
+                  শুধু chatbot না — আপনার সম্পূর্ণ business automation এর জন্য আমরা আছি।
+               </p>
+            </div>
+
+            {/* 3 CARDS */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch pt-4">
+               
+               {/* Card 1 */}
+               <div className="bg-[#1e293b]/90 backdrop-blur-md border border-slate-700 rounded-3xl p-8 flex flex-col justify-between hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transition-all duration-300 relative group">
+                  <div>
+                     <div className="text-5xl text-center mb-6">🎙️</div>
+                     <h3 className="text-2xl font-bold text-white text-center mb-4">Voice AI Agent</h3>
+                     <p className="text-slate-300 text-sm text-center mb-6 leading-relaxed">
+                        AI নিজেই ফোন করবে, কথা বলবে, lead qualify করবে — আপনাকে ছাড়া। ২৪/৭ automated calling।
+                     </p>
+                     <ul className="space-y-3 mb-8 text-sm">
+                        {[
+                           "Outbound call automation",
+                           "Lead qualification",
+                           "Call summary রিপোর্ট",
+                           "বাংলায় কথা বলতে পারে"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+                  <button 
+                     onClick={() => setActiveModal('voice')}
+                     className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
+                  >
+                     আরো জানুন →
+                  </button>
+               </div>
+
+               {/* Card 2 (HIGHLIGHTED) */}
+               <div className="bg-[#1e293b]/95 backdrop-blur-md border-[3px] border-purple-500 rounded-3xl p-8 flex flex-col justify-between hover:shadow-[0_0_35px_rgba(124,58,237,0.45)] transition-all duration-300 relative group lg:-translate-y-4 shadow-[0_0_25px_rgba(124,58,237,0.25)] z-10">
+                  <div>
+                     <div className="text-5xl text-center mb-6">⚙️</div>
+                     <h3 className="text-2xl font-bold text-white text-center mb-4">AI Automation</h3>
+                     <p className="text-slate-300 text-sm text-center mb-6 leading-relaxed">
+                        আপনার সব repetitive কাজ AI দিয়ে automate করুন — order processing, follow-up, reporting সব automatic।
+                     </p>
+                     <ul className="space-y-3 mb-8 text-sm">
+                        {[
+                           "Order management",
+                           "Automatic follow-up",
+                           "Report generation",
+                           "Multi-platform integration"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+                  <button 
+                     onClick={() => setActiveModal('automation')}
+                     className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                  >
+                     আরো জানুন →
+                  </button>
+               </div>
+
+               {/* Card 3 */}
+               <div className="bg-[#1e293b]/90 backdrop-blur-md border border-slate-700 rounded-3xl p-8 flex flex-col justify-between hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transition-all duration-300 relative group">
+                  <div>
+                     <div className="text-5xl text-center mb-6">🔧</div>
+                     <h3 className="text-2xl font-bold text-white text-center mb-4">Custom Build</h3>
+                     <p className="text-slate-300 text-sm text-center mb-6 leading-relaxed">
+                        আপনার business এর জন্য সম্পূর্ণ নতুনভাবে তৈরি AI system — আপনার নিজস্ব requirement অনুযায়ী।
+                     </p>
+                     <ul className="space-y-3 mb-8 text-sm">
+                        {[
+                           "সম্পূর্ণ custom design",
+                           "আপনার system এর সাথে connect",
+                           "Dedicated development team",
+                           "Long-term support"
+                        ].map((feat, i) => (
+                           <li key={i} className="flex items-start text-slate-300">
+                              <Check className="w-5 h-5 text-green-400 mr-2.5 flex-shrink-0" strokeWidth={3} />
+                              <span>{feat}</span>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+                  <button 
+                     onClick={() => setActiveModal('custom')}
+                     className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
+                  >
+                     আরো জানুন →
+                  </button>
+               </div>
+
+            </div>
+
+            {/* DIVIDER LINE */}
+            <div className="my-20 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
+
+            {/* BOTTOM CTA */}
+            <div className="text-center max-w-2xl mx-auto">
+               <h3 className="text-2xl md:text-4xl font-bold text-white mb-4">কোন্‌টা আপনার জন্য সঠিক?</h3>
+               <p className="text-slate-400 text-sm md:text-base mb-8">একটা Free Call এ সব প্রশ্নের উত্তর পেয়ে যাবেন।</p>
+               
+               <a 
+                  href="https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl text-lg transition-all duration-300 shadow-xl shadow-purple-600/30 transform hover:-translate-y-0.5 active:translate-y-0"
+               >
+                  <span>📞 Free 30-min Consultation Call বুক করুন</span>
+               </a>
+               
+               <p className="text-xs text-slate-400 mt-4 italic">
+                  কোনো commitment নেই — শুধু সঠিক পরামর্শ। সম্পূর্ণ বিনামূল্যে।
+               </p>
+            </div>
+
+         </div>
+
+         {/* 3 Modals with Smooth AnimatePresence */}
+         <AnimatePresence>
+            {activeModal && (
+               <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                  {/* Backdrop */}
+                  <motion.div 
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     className="absolute inset-0 bg-black/85 backdrop-blur-md"
+                     onClick={() => setActiveModal(null)}
+                  />
+                  
+                  {/* Modal Container */}
+                  <motion.div 
+                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                     animate={{ opacity: 1, scale: 1, y: 0 }}
+                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                     transition={{ type: "spring", duration: 0.4 }}
+                     className="relative w-full max-w-lg bg-[#0f0f20] border-2 border-purple-500/40 rounded-3xl p-8 text-white shadow-[0_0_50px_rgba(124,58,237,0.4)] z-10"
+                  >
+                     {/* Close Button */}
+                     <button 
+                        onClick={() => setActiveModal(null)}
+                        className="absolute top-5 right-5 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                     >
+                        <X className="w-6 h-6" />
+                     </button>
+
+                     {/* Modal Content depending on the activeModal state */}
+                     {activeModal === 'voice' && (
+                        <div>
+                           <div className="text-5xl mb-4">🎙️</div>
+                           <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-6">
+                              Voice AI Agent
+                           </h3>
+                           <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                              আপনার business এর হয়ে AI নিজেই call করবে, lead qualify করবে এবং appointment বুক করবে — ২৪/৭, কোনো বিরতি ছাড়া। আপনার sales team এর কাজ AI করবে, আপনি শুধু ready customer পাবেন।
+                           </p>
+                        </div>
+                     )}
+
+                     {activeModal === 'automation' && (
+                        <div>
+                           <div className="text-5xl mb-4">⚙️</div>
+                           <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-6">
+                              AI Automation
+                           </h3>
+                           <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                              Order processing, follow-up, reporting — আপনার সব repetitive কাজ AI দিয়ে automate করুন। সময় বাঁচান, ভুল কমান, এবং business কে scale করুন — manual কাজ ছাড়াই।
+                           </p>
+                        </div>
+                     )}
+
+                     {activeModal === 'custom' && (
+                        <div>
+                           <div className="text-5xl mb-4">🔧</div>
+                           <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-6">
+                              Custom Build
+                           </h3>
+                           <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                              আপনার business এর জন্য সম্পূর্ণ custom AI system। আপনার নিজস্ব requirement অনুযায়ী design, আপনার existing system এর সাথে connect, এবং dedicated team এর support — শুরু থেকে শেষ পর্যন্ত।
+                           </p>
+                        </div>
+                     )}
+
+                     {/* Standard CTA */}
+                     <a
+                        href="https://calendly.com/mehedi-perfectplusai/discovery-call-with-mehedi"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setActiveModal(null)}
+                        className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl transition-all duration-300 shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 text-lg transform hover:-translate-y-0.5 active:translate-y-0 animate-pulse"
+                     >
+                        📞 Free 30-min Consultation Call বুক করুন
+                     </a>
+                  </motion.div>
+               </div>
+            )}
+         </AnimatePresence>
       </motion.section>
 
       {/* 7. Resources & Automation Section */}
@@ -1541,7 +2126,7 @@ const BDPage: React.FC = () => {
                          ))}
                       </ul>
                       <button 
-                          onClick={scrollToForm}
+                          onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
                           className="px-8 py-3 bg-brand-purple text-white rounded-full font-bold hover:bg-brand-purple/90 transition-colors shadow-lg hover:shadow-brand-purple/25"
                       >
                           Get Started
@@ -1617,7 +2202,7 @@ const BDPage: React.FC = () => {
                          ))}
                       </ul>
                       <button 
-                          onClick={scrollToForm}
+                          onClick={() => navigate('/resources')}
                           className="px-8 py-3 bg-brand-purple text-white rounded-full font-bold hover:bg-brand-purple/90 transition-colors shadow-lg hover:shadow-brand-purple/25"
                       >
                           Explore Resources
@@ -1712,113 +2297,58 @@ const BDPage: React.FC = () => {
                            )}
                         </div>
                       </button>
-                      
-                      <div 
-                        className={`px-6 text-slate-600 leading-relaxed overflow-hidden transition-[max-height,opacity,padding] duration-500 ease-in-out ${
-                          isOpen ? 'max-h-[800px] pb-8 pt-0 opacity-100' : 'max-h-0 pb-0 opacity-0'
-                        }`}
-                      >
-                        <div className="pt-2">
-                          {faq.isPricing ? (
-                            <div className="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
-                                <ul className="space-y-3">
-                                    <li className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
-                                       <span className="font-medium text-slate-700">Starter Plan</span>
-                                       <span className="font-bold text-slate-900">BDT 2,999</span>
-                                    </li>
-                                    <li className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
-                                       <span className="font-medium text-slate-700">Standard Plan</span>
-                                       <span className="font-bold text-brand-purple">BDT 4,999</span>
-                                    </li>
-                                    <li className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
-                                       <span className="font-medium text-slate-700">Premium Plan</span>
-                                       <span className="font-bold text-slate-900">BDT 9,999</span>
-                                    </li>
-                                </ul>
+
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="px-6 pb-6 pt-2 text-slate-600 leading-relaxed border-t border-gray-100 whitespace-pre-line">
+                              {faq.answer}
                             </div>
-                          ) : faq.isList ? (
-                            <ul className="space-y-3 pl-2">
-                               {faq.items?.map((item, i) => (
-                                 <li key={i} className="flex items-start gap-3">
-                                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-purple flex-shrink-0"></div>
-                                    <span className="text-slate-600">{item}</span>
-                                 </li>
-                               ))}
-                            </ul>
-                          ) : (
-                            faq.answer
-                          )}
-                        </div>
-                      </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   );
                 })}
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* 9. Let's Get Started Form */}
-      <motion.section 
-        id="onboarding-form" 
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="py-32 bg-slate-50 border-t border-gray-100 relative overflow-hidden"
-      >
-        {/* Animated Background */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-            <div className="absolute left-0 top-0 -z-10 h-[500px] w-[500px] rounded-full bg-brand-purple/5 blur-[100px] animate-pulse"></div>
-            <div className="absolute right-0 bottom-0 -z-10 h-[500px] w-[500px] rounded-full bg-blue-500/5 blur-[100px] animate-pulse delay-700"></div>
-        </div>
-
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900">Let's Get Started</h2>
-                <p className="text-lg text-slate-600 mt-4">Fill out the form below to kickstart your AI automation journey.</p>
-            </div>
-
-            {/* Tally Embed */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 flex flex-col">
-                <div key={tallyKey} className="w-full">
-                    <iframe 
-                        data-tally-src="https://tally.so/embed/woLOvx?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
-                        loading="lazy" 
-                        width="100%" 
-                        height="600" 
-                        frameBorder="0" 
-                        marginHeight={0} 
-                        marginWidth={0} 
-                        title="Get in Touch"
-                        className="w-full"
-                    ></iframe>
-                </div>
-                {/* Submit Another Response Button */}
-                <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-center">
-                    <button 
-                        onClick={handleResetTally}
-                        className="px-6 py-2 bg-brand-purple text-white font-bold rounded-full hover:bg-brand-purple/90 transition-colors shadow-md text-sm flex items-center gap-2"
-                    >
-                        Submit Another Response
-                    </button>
-                </div>
-            </div>
-        </div>
-      </motion.section>
-
-      {/* Footer-like statement */}
-      <section className="py-20 bg-[#F9FAFB] border-t border-gray-100">
-         <div className="max-w-7xl mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-serif text-slate-900 mb-6">
-               Intelligent Workforce, Empowering Humans
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-               Creating AI solutions for your business that help you accelerate growth and scale fast without the overhead.
-            </p>
+             </motion.div>
+           </div>
          </div>
-      </section>
+       </motion.section>
+
+       {/* External Modals */}
+       <OrderFormModal
+          showOrderModal={showOrderModal}
+          setShowOrderModal={setShowOrderModal}
+          selectedPlan={selectedPlan}
+          orderForm={orderForm}
+          setOrderForm={setOrderForm}
+          orderErrors={orderErrors}
+          setOrderErrors={setOrderErrors}
+          orderStep={orderStep}
+          setOrderStep={setOrderStep}
+          copied={copied}
+          setCopied={setCopied}
+          toBengaliNumber={toBengaliNumber}
+          getPlanPrice={getPlanPrice}
+       />
+
+       <ContactFormModal
+          showContactModal={showContactModal}
+          setShowContactModal={setShowContactModal}
+          contactForm={contactForm}
+          setContactForm={setContactForm}
+          contactErrors={contactErrors}
+          setContactErrors={setContactErrors}
+          contactSubmitted={contactSubmitted}
+          setContactSubmitted={setContactSubmitted}
+          contactSubmitting={contactSubmitting}
+          setContactSubmitting={setContactSubmitting}
+       />
 
     </div>
   );
