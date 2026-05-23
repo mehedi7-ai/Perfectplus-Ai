@@ -8,6 +8,7 @@ import BDPage from './components/BDPage';
 import ResourcesPage from './components/ResourcesPage';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import RefundPolicy from './components/RefundPolicy';
 import ScrollToTop from './components/ScrollToTop';
 import { FloatingContact } from './components/FloatingContact';
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
         </Routes>
       </main>
 

@@ -105,8 +105,19 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-20 pt-8 border-t border-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-medium">
+        <div className="mt-20 pt-8 border-t border-gray-900 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gray-500 font-medium">
           <p>© {new Date().getFullYear()} Perfectplus Ai. All rights reserved.</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-400">
+            <Link to="/privacy" className="hover:text-brand-purple transition-all duration-200">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:text-brand-purple transition-all duration-200">
+              Terms of Service
+            </Link>
+            <Link to="/refund-policy" className="hover:text-brand-purple transition-all duration-200">
+              Refund Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

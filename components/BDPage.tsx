@@ -360,7 +360,7 @@ const BDPage: React.FC = () => {
   // 2-Step Order Form Modal State
   const [selectedPlan, setSelectedPlan] = useState<'Starter' | 'Growth' | 'Pro' | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [orderStep, setOrderStep] = useState<1 | 2>(1);
+  const [orderStep, setOrderStep] = useState<number>(1);
   const [copied, setCopied] = useState(false);
 
   // Contact Form Modal State
@@ -1655,13 +1655,29 @@ const BDPage: React.FC = () => {
             </div>
 
             {/* PART C — Section Title */}
-            <div className="text-center mb-16 max-w-3xl mx-auto">
+            <div className="text-center mb-12 max-w-3xl mx-auto">
                <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight">
                   আপনার Business এর সাইজ অনুযায়ী Plan বেছে নিন
                </h2>
                <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
                   ১ জন Customer ১০০টা Message করলেও সেটা মাত্র ১টি Conversation — আপনি pay করেন customer এর সংখ্যায়, message এ নয়।
                </p>
+            </div>
+
+            {/* Animated helper arrow for mobile/desktop selection guidance */}
+            <div className="flex flex-col items-center justify-center -mt-6 mb-12 text-center">
+               <style>{`
+                  @keyframes cardSelectorBounce {
+                     0%, 100% { transform: translateY(0); }
+                     50% { transform: translateY(6px); }
+                  }
+                  .animate-card-selector-bounce {
+                     animation: cardSelectorBounce 1.2s infinite ease-in-out;
+                  }
+               `}</style>
+               <div className="animate-card-selector-bounce inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-5 py-2.5 rounded-full text-purple-300 text-[16px] md:text-[18px] font-bold shadow-lg shadow-purple-500/5 backdrop-blur-sm">
+                  <span>👇 নিচে আপনার Plan বেছে নিন</span>
+               </div>
             </div>
 
             {/* PART D — 3 Pricing Cards */}
@@ -1716,7 +1732,7 @@ const BDPage: React.FC = () => {
                      }}
                      className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
                   >
-                     🛒 এখনই অর্ডার করুন →
+                     🛒 এখানে ক্লিক করে অর্ডার করুন →
                   </button>
                </div>
 
@@ -1771,7 +1787,7 @@ const BDPage: React.FC = () => {
                      }}
                      className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                   >
-                     🛒 এখনই অর্ডার করুন →
+                     🛒 এখানে ক্লিক করে অর্ডার করুন →
                   </button>
                </div>
 
@@ -1821,7 +1837,7 @@ const BDPage: React.FC = () => {
                      }}
                      className="w-full py-4 text-center border-2 border-purple-600 hover:bg-purple-600/10 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-purple-600 group-hover:border-purple-500"
                   >
-                     🛒 এখনই অর্ডার করুন →
+                     🛒 এখানে ক্লিক করে অর্ডার করুন →
                   </button>
                </div>
 
