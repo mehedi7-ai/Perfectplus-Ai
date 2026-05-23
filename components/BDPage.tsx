@@ -786,7 +786,7 @@ const BDPage: React.FC = () => {
     }
   ];
 
-  const SLOTS_TAKEN = 67;
+  const SLOTS_TAKEN = 71;
   const TOTAL_SLOTS = 100;
   const SLOTS_LEFT = TOTAL_SLOTS - SLOTS_TAKEN;
   const PROGRESS_PERCENT = (SLOTS_TAKEN / TOTAL_SLOTS) * 100;
@@ -1647,8 +1647,8 @@ const BDPage: React.FC = () => {
                         ></div>
                      </div>
                      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-sm md:text-base">
-                        <span className="text-slate-300 font-medium">{SLOTS_TAKEN} জন Business Owner ইতিমধ্যে শুরু করেছেন</span>
-                        <span className="text-red-400 font-semibold flex items-center gap-1">মাত্র {SLOTS_LEFT}টি স্লট বাকি ⚠️</span>
+                        <span className="text-slate-300 font-medium">{toBengaliNumber(SLOTS_TAKEN)} জন Business Owner ইতিমধ্যে শুরু করেছেন</span>
+                        <span className="text-red-400 font-semibold flex items-center gap-1">মাত্র {toBengaliNumber(SLOTS_LEFT)}টি স্লট বাকি ⚠️</span>
                      </div>
                   </div>
                </div>
