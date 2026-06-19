@@ -337,7 +337,7 @@ const AboutUsPage: React.FC = () => {
                  <h2 className="text-3xl md:text-5xl font-extrabold text-white">Media Center</h2>
                  <p className="text-slate-400 mt-2">Latest insights, tutorials, and demos.</p>
               </div>
-              <a href="https://www.youtube.com/@perfectplusai" target="_blank" rel="noreferrer" className="hidden md:flex items-center gap-2 text-brand-purple font-bold hover:text-white transition-colors">
+              <a href="https://www.youtube.com/@IM_Mehedi_Hasan" target="_blank" rel="noreferrer" className="hidden md:flex items-center gap-2 text-brand-purple font-bold hover:text-white transition-colors">
                  View Channel <Rocket size={16} />
               </a>
            </motion.div>
@@ -349,7 +349,7 @@ const AboutUsPage: React.FC = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="lg:col-span-2 group cursor-pointer"
+                className="lg:col-span-2 group cursor-pointer" onClick={() => window.open('https://youtu.be/Vy-BUc_dAIU?si=5qufWKnv3jR3eKqK', '_blank')}
               >
                  <div className="relative aspect-video rounded-3xl overflow-hidden bg-slate-800 shadow-2xl border border-white/10">
                     <img 
@@ -364,7 +364,7 @@ const AboutUsPage: React.FC = () => {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
                        <span className="px-3 py-1 bg-brand-purple text-white text-xs font-bold rounded-full mb-3 inline-block">FEATURED</span>
-                       <h3 className="text-2xl md:text-3xl font-bold leading-tight">Gemini 3.0 vs Traditional Voice AI</h3>
+                       <h3 className="text-2xl md:text-3xl font-bold leading-tight">Gemini 3.0 Voice AI in 3 Min</h3>
                     </div>
                  </div>
               </motion.div>
@@ -375,12 +375,14 @@ const AboutUsPage: React.FC = () => {
                     {
                        title: "How AI Receptionists Save $3000+",
                        img: "https://i.ibb.co.com/1G9TWTPJ/Black-White-Red-Simple-Modern-Elegant-Video-How-To-You-Tube-Thumbnail.png",
-                       duration: "10:24"
+                       duration: "10:24",
+                       url: "https://youtu.be/x5WGQa-4nhQ?si=mYzbzCkv5qAdB-Nt"
                     },
                     {
                        title: "Live Demo: Booking an Appointment",
                        img: "https://i.ibb.co.com/svdzwtKh/Black-Green-Red-Simple-Modern-Vlog-You-Tube-Thumbnail.png",
-                       duration: "05:12"
+                       duration: "05:12",
+                       url: "https://youtu.be/yfnLuVQ0PvY?si=a74go0R1O0p2ql00"
                     }
                  ].map((video, idx) => (
                     <motion.div 
@@ -389,7 +391,7 @@ const AboutUsPage: React.FC = () => {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: 0.4 + (idx * 0.1) }}
-                      className="flex gap-4 group cursor-pointer p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5"
+                      className="flex gap-4 group cursor-pointer p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5" onClick={() => window.open(video.url, '_blank')}
                     >
                        <div className="relative w-40 aspect-video rounded-xl overflow-hidden bg-slate-800 flex-shrink-0">
                           <img src={video.img} alt={video.title} className="w-full h-full object-cover" />
